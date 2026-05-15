@@ -47,7 +47,7 @@
  
  export function AboutPage() {
    return (
-     <section className="min-h-screen bg-[#07090d] text-zinc-300">
+     <section className="min-h-screen bg-[#07090d] text-zinc-300 pt-16 pb-20 md:pb-0"> {/* Added padding for fixed navbars */}
        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
          {/* Hero Header */}
          <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0c1119] p-8 sm:p-12 lg:p-16">

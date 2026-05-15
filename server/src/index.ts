@@ -1,22 +1,22 @@
-import http from "node:http";
-import { Server as SocketIOServer } from "socket.io";
+import { createServer } from "node:http";
+import { Server } from "socket.io";
 import { config } from "./config.js";
 import { configureApp, createBaseApp } from "./createApp.js";
-import { registerTrackingSocket } from "./socket/tracking.js";
 
 const app = createBaseApp();
-const httpServer = http.createServer(app);
-const io = new SocketIOServer(httpServer, {
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
   cors: {
     origin: config.corsOrigin,
-    methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
 configureApp(app, io);
-registerTrackingSocket(io);
 
-httpServer.listen(config.port, () => {
-  // eslint-disable-next-line no-console
-  console.log(`HASH FOOD API + Socket.io on :${config.port}`);
+const port = config.port;
+httpServer.listen(port, () => {
+  console.log(`🚀 Hash Food API ready at http://localhost:${port}`);
+  console.log(`🔗 Health check: http://localhost:${port}/health`);
+  console.log(`📡 Real-time (Socket.IO) enabled`);
 });
