@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum UserRole {
+  CUSTOMER
+  RESTAURANT_ADMIN
+  RIDER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  CONFIRMED
+  PREPARING
+  READY_FOR_PICKUP
+  PICKED_UP
+  EN_ROUTE
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentProvider {
+  MPESA
+  AIRTEL_MONEY
+  TIGO_PESA
+  HALOPESA
+  CARD
+  MOCK
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  fullName     String?
+  role         UserRole @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant?
+  rider      Rider?
+  orders     Order[]     @relation("CustomerOrders")
+}
+
+model Restaurant {
+  id              String   @id @default(cuid())
+  ownerUserId     String?  @unique
+  name            String
+  slug            String   @unique
+  description     String?
+  city            String   @default("Mwanza")
+  address         String?
+  lat             Float?
+  lng             Float?
+  deliveryFeeTzs  Int      @default(2000)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  owner  User?      @relation(fields: [ownerUserId], references: [id])
+  menu   MenuItem[]
+  orders Order[]
+}
+
+model MenuItem {
+  id           String   @id @default(cuid())
+  restaurantId String
+  name         String
+  description  String?
+  priceTzs     Int
+  imageUrl     String?
+  isAvailable  Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  restaurant Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  @@index([restaurantId])
+}
+
+model Rider {
+  id         String    @id @default(cuid())
+  userId     String    @unique
+  vehicleType String?
+  isOnline   Boolean   @default(false)
+  currentLat Float?
+  currentLng Float?
+  heading    Float?
+  lastSeenAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@index([isOnline])
+}
+
+model Order {
+  id               String      @id @default(cuid())
+  customerId       String
+  restaurantId     String
+  riderId          String?
+  status           OrderStatus @default(PENDING_PAYMENT)
+  deliveryAddress  String
+  deliveryLat      Float?
+  deliveryLng      Float?
+  subtotalTzs      Int
+  deliveryFeeTzs   Int
+  totalTzs         Int
+  notes            String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  customer   User       @relation("CustomerOrders", fields: [customerId], references: [id])
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  rider      Rider?     @relation(fields: [riderId], references: [id])
+  items      OrderItem[]
+  payments   Payment[]
+
+  @@index([customerId])
+  @@index([restaurantId])
+  @@index([riderId])
+  @@index([status])
+}
+
+model OrderItem {
+  id           String @id @default(cuid())
+  orderId      String
+  menuItemId   String
+  quantity     Int
+  unitPriceTzs Int
+
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@index([orderId])
+}
+
+model Payment {
+  id            String          @id @default(cuid())
+  orderId       String
+  provider      PaymentProvider
+  amountTzs     Int
+  currency      String          @default("TZS")
+  status        PaymentStatus   @default(PENDING)
+  msisdn        String?
+  externalRef   String?         @unique
+  providerMeta  Json?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([status])
+}
