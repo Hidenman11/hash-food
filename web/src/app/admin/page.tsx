@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   DeliveryLineChartClient,
   OrdersAreaChartClient,
@@ -8,30 +8,64 @@ import {
 } from "@/components/admin/charts-client";
 import { StatCard } from "@/components/admin/StatCard";
 import DeliveryMap from "@/components/admin/DeliveryMap";
+import { getAdminStats, type AdminStats } from "@/lib/api";
 
-const recentOrders = [
-  { id: "#HF2041", customer: "Asha K.", restaurant: "Pizza Time", rider: "John D.", total: "TSh 48,200", status: "Delivered" },
-  { id: "#HF2040", customer: "Juma M.", restaurant: "Burger House", rider: "Sarah M.", total: "TSh 22,500", status: "On the way" },
-  { id: "#HF2039", customer: "Neema R.", restaurant: "Spice Route", rider: "Mike T.", total: "TSh 31,000", status: "Preparing" },
-  { id: "#HF2038", customer: "Peter L.", restaurant: "Sushi Zen", rider: "Emma R.", total: "TSh 67,800", status: "New" },
-  { id: "#HF2037", customer: "Grace T.", restaurant: "Fresh Bowl", rider: "David K.", total: "TSh 19,400", status: "Delivered" },
-] as const;
-
-function statusStyle(status: string) {
+const statusStyle = (status: string) => {
   switch (status) {
-    case "Delivered":
+    case "DELIVERED":
       return "bg-emerald-500/15 text-emerald-400 ring-emerald-500/25";
-    case "On the way":
+    case "EN_ROUTE":
+    case "PICKED_UP":
       return "bg-orange-500/15 text-orange-300 ring-orange-500/25";
-    case "Preparing":
+    case "PREPARING":
+    case "READY_FOR_PICKUP":
       return "bg-amber-500/15 text-amber-300 ring-amber-500/25";
+    case "CONFIRMED":
+      return "bg-blue-500/15 text-blue-300 ring-blue-500/25";
+    case "CANCELLED":
+      return "bg-red-500/15 text-red-400 ring-red-500/25";
     default:
       return "bg-sky-500/15 text-sky-300 ring-sky-500/25";
   }
-}
+};
 
 export default function AdminDashboardPage() {
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [warning, setWarning] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const result = await getAdminStats();
+        setStats(result.data);
+        if (result.isFallback) {
+          setWarning("Unable to load live data, showing demo stats.");
+        }
+      } catch (err) {
+        console.error("Admin dashboard fetch error:", err);
+        setWarning("Unable to load live data, showing demo stats.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  if (loading || !stats) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
+          <p className="mt-4 text-zinc-400">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -39,36 +73,41 @@ export default function AdminDashboardPage() {
         <p className="mt-1 text-sm text-zinc-500">
           Real-time snapshot of orders, revenue, and fleet health across Mwanza.
         </p>
+        {warning ? (
+          <div className="mt-4 rounded-2xl border border-orange-400/25 bg-orange-500/10 p-4 text-sm text-orange-200">
+            {warning}
+          </div>
+        ) : null}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Total orders"
-          value="12,480"
-          hint="Last 7 days"
+          value={stats.overview.totalOrders.toLocaleString()}
+          hint="All time"
           delta="+12.4%"
           trend="up"
         />
         <StatCard
-          title="Gross revenue"
-          value="TSh 428M"
-          hint="Incl. fees & tips"
+          title="Orders this week"
+          value={stats.overview.ordersThisWeek.toLocaleString()}
+          hint="Last 7 days"
           delta="+8.1%"
           trend="up"
         />
         <StatCard
+          title="Revenue this week"
+          value={`TSh ${(stats.overview.revenueThisWeek / 1000000).toFixed(1)}M`}
+          hint="Last 7 days"
+          delta="+15.2%"
+          trend="up"
+        />
+        <StatCard
           title="Active riders"
-          value="186"
+          value={stats.overview.activeRiders.toString()}
           hint="On shift now"
           delta="-3.2%"
           trend="down"
-        />
-        <StatCard
-          title="Partner restaurants"
-          value="542"
-          hint="Live on platform"
-          delta="+2.0%"
-          trend="up"
         />
       </div>
 
@@ -148,18 +187,18 @@ export default function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
-                {recentOrders.map((row) => (
+                {stats.recentOrders.map((row) => (
                   <tr key={row.id} className="text-zinc-300">
-                    <td className="py-3 font-mono text-xs text-white">{row.id}</td>
+                    <td className="py-3 font-mono text-xs text-white">{row.id.slice(-6)}</td>
                     <td className="py-3">{row.customer}</td>
                     <td className="py-3 text-zinc-400">{row.restaurant}</td>
-                    <td className="py-3 text-zinc-400">{row.rider}</td>
-                    <td className="py-3 font-medium text-white">{row.total}</td>
+                    <td className="py-3 text-zinc-400">{row.rider || "Unassigned"}</td>
+                    <td className="py-3 font-medium text-white">TSh {row.total.toLocaleString()}</td>
                     <td className="py-3">
                       <span
                         className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${statusStyle(row.status)}`}
                       >
-                        {row.status}
+                        {row.status.replace('_', ' ')}
                       </span>
                     </td>
                   </tr>
@@ -194,62 +233,32 @@ export default function AdminDashboardPage() {
                 <th className="pb-3 font-medium">Order</th>
                 <th className="pb-3 font-medium">Customer → Restaurant</th>
                 <th className="pb-3 font-medium">Assigned Rider</th>
-                <th className="pb-3 font-medium">ETA</th>
                 <th className="pb-3 font-medium">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
-              <tr className="text-zinc-300">
-                <td className="py-3 font-mono text-xs text-white">#HF2040</td>
-                <td className="py-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-zinc-400">Juma M.</span>
-                    <span className="text-xs text-zinc-600">→</span>
-                    <span className="text-zinc-300">Burger House</span>
-                  </div>
-                </td>
-                <td className="py-3 text-orange-400 font-medium">Sarah M.</td>
-                <td className="py-3 text-zinc-400">12 min</td>
-                <td className="py-3">
-                  <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 bg-orange-500/15 text-orange-300 ring-orange-500/25">
-                    On the way
-                  </span>
-                </td>
-              </tr>
-              <tr className="text-zinc-300">
-                <td className="py-3 font-mono text-xs text-white">#HF2039</td>
-                <td className="py-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-zinc-400">Neema R.</span>
-                    <span className="text-xs text-zinc-600">→</span>
-                    <span className="text-zinc-300">Spice Route</span>
-                  </div>
-                </td>
-                <td className="py-3 text-orange-400 font-medium">Mike T.</td>
-                <td className="py-3 text-zinc-400">8 min</td>
-                <td className="py-3">
-                  <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 bg-amber-500/15 text-amber-300 ring-amber-500/25">
-                    Preparing
-                  </span>
-                </td>
-              </tr>
-              <tr className="text-zinc-300">
-                <td className="py-3 font-mono text-xs text-white">#HF2038</td>
-                <td className="py-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-zinc-400">Peter L.</span>
-                    <span className="text-xs text-zinc-600">→</span>
-                    <span className="text-zinc-300">Sushi Zen</span>
-                  </div>
-                </td>
-                <td className="py-3 text-zinc-500">Unassigned</td>
-                <td className="py-3 text-zinc-400">-</td>
-                <td className="py-3">
-                  <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 bg-sky-500/15 text-sky-300 ring-sky-500/25">
-                    New
-                  </span>
-                </td>
-              </tr>
+              {stats.activeDeliveries.map((delivery) => (
+                <tr key={delivery.id} className="text-zinc-300">
+                  <td className="py-3 font-mono text-xs text-white">#{delivery.id.slice(-6)}</td>
+                  <td className="py-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-zinc-400">{delivery.customer.name}</span>
+                      <span className="text-xs text-zinc-600">→</span>
+                      <span className="text-zinc-300">{delivery.restaurant.name}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 text-orange-400 font-medium">
+                    {delivery.rider?.name || "Unassigned"}
+                  </td>
+                  <td className="py-3">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${statusStyle(delivery.status)}`}
+                    >
+                      {delivery.status.replace('_', ' ')}
+                    </span>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

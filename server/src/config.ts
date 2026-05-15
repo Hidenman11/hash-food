@@ -14,6 +14,9 @@ export const config = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
   corsOrigin: process.env.CORS_ORIGIN?.split(",").map((s) => s.trim()) ?? [
     "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
   ],
   googleMapsBrowserKey: process.env.GOOGLE_MAPS_BROWSER_KEY ?? "",
   googleMapsServerKey: process.env.GOOGLE_MAPS_SERVER_KEY ?? "",

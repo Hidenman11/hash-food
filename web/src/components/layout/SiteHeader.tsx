@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Logo } from "@/components/brand/Logo";
 import { Container } from "@/components/ui/Container";
 import { cn } from "@/lib/cn";
@@ -59,6 +60,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const readCartCount = () => {
@@ -131,24 +133,35 @@ export function SiteHeader() {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/[0.05] bg-black/80 backdrop-blur-xl supports-[backdrop-filter]:bg-black/65">
+    <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-black/70 backdrop-blur-3xl supports-[backdrop-filter]:bg-black/70 shadow-[0_18px_45px_-30px_rgba(0,0,0,0.75)]">
       <Container>
-        <div className="flex h-[4.25rem] items-center justify-between gap-3 lg:gap-6">
-          <Logo className="min-w-0" />
+        <div className="flex h-[4.75rem] items-center justify-between gap-3 lg:gap-6">
+          <Logo className="min-w-0 transition-transform duration-300 hover:-translate-y-0.5" />
 
-          <nav
-            className="hidden items-center gap-0.5 lg:flex"
-            aria-label="Main"
-          >
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-xl px-3 py-2 text-sm font-medium text-zinc-400 transition hover:bg-white/[0.04] hover:text-white"
-              >
-                {item.label}
-              </Link>
-            ))}
+          <nav className="hidden items-center gap-2 lg:flex" aria-label="Main">
+            {navItems.map((item) => {
+              const active = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "group relative overflow-hidden rounded-full px-4 py-2 text-sm font-medium transition duration-300 ease-out",
+                    active
+                      ? "bg-gradient-to-r from-orange-500/20 via-white/10 to-orange-500/15 text-white shadow-[0_16px_45px_-22px_rgba(255,140,0,0.8)]"
+                      : "text-zinc-300 hover:text-white hover:bg-white/10",
+                  )}
+                >
+                  {item.label}
+                  <span
+                    className={cn(
+                      "pointer-events-none absolute inset-x-4 -bottom-1 h-0.5 rounded-full bg-gradient-to-r from-orange-400 to-orange-500 transition-all duration-300",
+                      active ? "opacity-100 scale-x-100" : "opacity-0 group-hover:opacity-100",
+                    )}
+                  />
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -169,7 +182,7 @@ export function SiteHeader() {
 
             <Link
               href="/cart"
-              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-[#141414] text-zinc-200 transition hover:border-orange-500/30 hover:text-white"
+              className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-white/[0.08] bg-[#141414] text-zinc-200 transition duration-300 ease-out hover:-translate-y-0.5 hover:border-orange-500/30 hover:text-white hover:shadow-lg hover:shadow-orange-500/20"
               aria-label={`Shopping cart, ${cartCount} items`}
             >
               <CartIcon />
@@ -250,19 +263,21 @@ export function SiteHeader() {
       <div
         id="mobile-nav"
         className={cn(
-          "fixed inset-x-0 top-[4.25rem] bottom-0 z-40 overflow-y-auto bg-[#0a0a0a]/98 backdrop-blur-lg transition lg:hidden",
-          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+          "fixed inset-x-0 top-[4.75rem] bottom-0 z-40 overflow-y-auto bg-[#08080a]/96 backdrop-blur-3xl transition-all duration-500 ease-in-out lg:hidden",
+          open ? "pointer-events-auto opacity-100 translate-y-0" : "pointer-events-none opacity-0 -translate-y-4",
         )}
       >
-        <nav className="flex flex-col gap-1 px-4 pb-10 pt-4" aria-label="Mobile">
+        <nav className="flex flex-col gap-2 px-4 pb-10 pt-4" aria-label="Mobile">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-xl px-4 py-3.5 text-base font-medium text-zinc-200 hover:bg-white/[0.04]"
+              className="group rounded-3xl px-4 py-4 text-base font-semibold text-zinc-200 transition duration-300 ease-out hover:-translate-y-0.5 hover:bg-white/10 hover:text-white"
               onClick={() => setOpen(false)}
             >
-              {item.label}
+              <span className="block text-sm text-zinc-400 group-hover:text-orange-300 transition-colors duration-300">
+                {item.label}
+              </span>
             </Link>
           ))}
           <div className="mt-4 border-t border-white/[0.08] pt-6">

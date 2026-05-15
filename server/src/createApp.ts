@@ -3,6 +3,7 @@ import express, { type Application } from "express";
 import helmet from "helmet";
 import type { Server as SocketIOServer } from "socket.io";
 import { config } from "./config.js";
+import { createAdminRouter } from "./routes/admin.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import mapsRoutes from "./routes/maps.routes.js";
 import { createOrdersRouter } from "./routes/orders.routes.js";
@@ -25,6 +26,7 @@ export function configureApp(app: Application, io: SocketIOServer) {
   });
 
   app.use("/v1/auth", authRoutes);
+  app.use("/v1/admin", createAdminRouter());
   app.use("/v1/restaurants", restaurantsRoutes);
   app.use("/v1/orders", createOrdersRouter(io));
   app.use("/v1/payments", createPaymentsRouter(io));

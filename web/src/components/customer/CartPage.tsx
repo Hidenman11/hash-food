@@ -4,12 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/cn";
+import { createOrder } from "@/lib/api";
 import { formatTzs } from "./customer-data";
 
 type CartItem = {
   id: string;
-  name: string;
+  menuItemId: string;
+  restaurantId: string;
   restaurant: string;
+  name: string;
   price: number;
   image: string;
   quantity: number;
@@ -20,8 +23,10 @@ const cartStorageKey = "hashfood_cart";
 const starterCart: CartItem[] = [
   {
     id: "pizza",
-    name: "Chicken Pizza",
+    menuItemId: "pizza",
+    restaurantId: "restaurant-pizza-time",
     restaurant: "Pizza Time",
+    name: "Chicken Pizza",
     price: 12000,
     image:
       "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=900&q=85",
@@ -29,8 +34,10 @@ const starterCart: CartItem[] = [
   },
   {
     id: "soda",
-    name: "Cold Soda",
+    menuItemId: "soda",
+    restaurantId: "restaurant-pizza-time",
     restaurant: "Pizza Time",
+    name: "Cold Soda",
     price: 2000,
     image:
       "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=85",
@@ -63,8 +70,11 @@ export function CartPage() {
   const [promoCode, setPromoCode] = useState("");
   const [appliedCode, setAppliedCode] = useState("");
   const [payment, setPayment] = useState<(typeof paymentMethods)[number]>("M-Pesa");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
   const [note, setNote] = useState("");
   const [placed, setPlaced] = useState(false);
+  const [status, setStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [checkoutMessage, setCheckoutMessage] = useState("");
 
   useEffect(() => {
     saveCart(cart);
@@ -107,9 +117,50 @@ export function CartPage() {
     }
   }
 
-  function checkout() {
+  async function checkout() {
     if (!cart.length) return;
-    setPlaced(true);
+    if (!deliveryAddress.trim()) {
+      setStatus("error");
+      setCheckoutMessage("Please enter a delivery address before checkout.");
+      return;
+    }
+
+    const restaurantId = cart[0].restaurantId;
+    if (cart.some((item) => item.restaurantId !== restaurantId)) {
+      setStatus("error");
+      setCheckoutMessage("Please place items from one restaurant at a time.");
+      return;
+    }
+
+    setStatus("saving");
+    setCheckoutMessage("");
+
+    try {
+      const response = await createOrder({
+        restaurantId,
+        deliveryAddress: deliveryAddress.trim(),
+        notes: note.trim() || undefined,
+        items: cart.map((item) => ({ menuItemId: item.menuItemId, quantity: item.quantity })),
+      });
+
+      setPlaced(true);
+      setStatus("success");
+      setCheckoutMessage(
+        `Order placed successfully${response?.data?.id ? `: ${response.data.id}` : ""}. You can track it on the Track Order page.`,
+      );
+      setCart([]);
+      setAppliedCode("");
+      setPromoCode("");
+      setDeliveryAddress("");
+      setNote("");
+    } catch (error) {
+      setStatus("error");
+      setCheckoutMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not place your order. Please try again or login before checkout.",
+      );
+    }
   }
 
   return (
@@ -267,6 +318,16 @@ export function CartPage() {
             </div>
 
             <label className="mt-5 block">
+              <span className="text-sm font-semibold text-zinc-300">Delivery address</span>
+              <input
+                value={deliveryAddress}
+                onChange={(event) => setDeliveryAddress(event.target.value)}
+                placeholder="Enter your delivery address"
+                className="mt-2 w-full rounded-xl border border-white/[0.08] bg-black/25 px-3 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-orange-400/50"
+              />
+            </label>
+
+            <label className="mt-5 block">
               <span className="text-sm font-semibold text-zinc-300">Delivery note</span>
               <textarea
                 value={note}
@@ -296,7 +357,20 @@ export function CartPage() {
               </div>
             </div>
 
-            {placed && (
+            {checkoutMessage ? (
+              <p
+                className={cn(
+                  "mt-5 rounded-xl px-4 py-3 text-sm",
+                  status === "success"
+                    ? "border border-emerald-500/25 bg-emerald-500/10 text-emerald-200"
+                    : "border border-red-500/20 bg-red-500/10 text-red-200",
+                )}
+              >
+                {checkoutMessage}
+              </p>
+            ) : null}
+
+            {placed && status !== "error" && (
               <p className="mt-5 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
                 Order imewekwa kwa {payment}. Unaweza kuifuatilia kwenye Track Order.
               </p>
@@ -304,11 +378,11 @@ export function CartPage() {
 
             <button
               type="button"
-              disabled={!cart.length}
+              disabled={!cart.length || status === "saving"}
               onClick={checkout}
               className="mt-5 min-h-12 w-full rounded-xl bg-orange-500 px-5 text-sm font-bold text-zinc-950 transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
             >
-              Checkout with {payment}
+              {status === "saving" ? "Placing order…" : `Checkout with ${payment}`}
             </button>
 
             <Link
