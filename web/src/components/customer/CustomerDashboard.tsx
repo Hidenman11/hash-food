@@ -29,8 +29,7 @@ const foods: FoodItem[] = [
     price: 12000,
     rating: 4.8,
     minutes: "25-35 min",
-    image:
-      "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=900&q=85",
+    image: "/images/pizza.svg",
     description: "Crispy crust, mozzarella, chicken, sweet peppers, and house tomato sauce.",
   },
   {
@@ -41,8 +40,7 @@ const foods: FoodItem[] = [
     price: 11000,
     rating: 4.7,
     minutes: "20-30 min",
-    image:
-      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=900&q=85",
+    image: "/images/spice-route.svg",
     description: "Spiced rice with tender beef, kachumbari, and a light chilli sauce.",
   },
   {
@@ -53,8 +51,7 @@ const foods: FoodItem[] = [
     price: 6000,
     rating: 4.5,
     minutes: "15-25 min",
-    image:
-      "https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?auto=format&fit=crop&w=900&q=85",
+    image: "/images/chicken.svg",
     description: "Golden fries folded into eggs, served with salad and tomato sauce.",
   },
   {
@@ -65,8 +62,7 @@ const foods: FoodItem[] = [
     price: 9000,
     rating: 4.9,
     minutes: "18-28 min",
-    image:
-      "https://images.unsplash.com/photo-1553979459-b888fc870885?auto=format&fit=crop&w=900&q=85",
+    image: "/images/burger.svg",
     description: "Grilled beef patty, cheese, pickles, onions, and smoky hash sauce.",
   },
   {
@@ -77,8 +73,7 @@ const foods: FoodItem[] = [
     price: 2000,
     rating: 4.4,
     minutes: "10-15 min",
-    image:
-      "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=85",
+    image: "/images/drinks.svg",
     description: "Chilled soft drink for the side of your meal.",
   },
 ];

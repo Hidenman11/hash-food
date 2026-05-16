@@ -133,7 +133,7 @@ export function SiteHeader() {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-black/70 backdrop-blur-3xl supports-[backdrop-filter]:bg-black/70 shadow-[0_18px_45px_-30px_rgba(0,0,0,0.75)]">
+    <header className="sticky top-0 z-[70] border-b border-white/[0.08] bg-black/80 shadow-[0_18px_45px_-30px_rgba(0,0,0,0.75)] backdrop-blur-3xl supports-[backdrop-filter]:bg-black/75">
       <Container>
         <div className="flex h-[4.75rem] items-center justify-between gap-3 lg:gap-6">
           <Logo className="min-w-0 transition-transform duration-300 hover:-translate-y-0.5" />
@@ -229,7 +229,7 @@ export function SiteHeader() {
 
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-[#141414] text-zinc-100 lg:hidden"
+              className="relative z-[72] inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-[#141414] text-zinc-100 transition hover:border-orange-400/40 lg:hidden"
               aria-expanded={open}
               aria-controls="mobile-nav"
               onClick={() => setOpen((v) => !v)}
@@ -260,24 +260,35 @@ export function SiteHeader() {
         </div>
       </Container>
 
+      <button
+        type="button"
+        aria-label="Close menu"
+        className={cn(
+          "fixed inset-0 top-[4.75rem] z-[68] bg-black/55 backdrop-blur-sm transition-opacity lg:hidden",
+          open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+        )}
+        onClick={() => setOpen(false)}
+      />
+
       <div
         id="mobile-nav"
         className={cn(
-          "absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4.75rem)] overflow-y-auto border-t border-white/[0.08] bg-[#08080a]/98 shadow-2xl shadow-black/70 backdrop-blur-3xl transition-all duration-300 ease-out lg:hidden",
-          open ? "pointer-events-auto opacity-100 translate-y-0" : "pointer-events-none opacity-0 -translate-y-4",
+          "absolute inset-x-3 top-full z-[71] max-h-[calc(100dvh-5.5rem)] overflow-y-auto rounded-b-3xl border border-t-0 border-white/[0.08] bg-[#08080a]/98 shadow-2xl shadow-black/80 backdrop-blur-3xl transition-all duration-300 ease-out sm:inset-x-6 lg:hidden",
+          open ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none -translate-y-4 opacity-0",
         )}
       >
-        <nav className="mx-auto flex max-w-7xl flex-col gap-2 px-4 pb-10 pt-4 sm:px-6 lg:px-8" aria-label="Mobile">
+        <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-3 pb-8 pt-3 sm:px-4" aria-label="Mobile">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="group rounded-3xl px-4 py-4 text-base font-semibold text-zinc-200 transition duration-300 ease-out hover:-translate-y-0.5 hover:bg-white/10 hover:text-white"
+              className={cn(
+                "group rounded-2xl px-4 py-3.5 text-base font-semibold transition duration-300 ease-out hover:bg-white/10 hover:text-white",
+                pathname === item.href ? "bg-white/[0.08] text-white" : "text-zinc-200",
+              )}
               onClick={() => setOpen(false)}
             >
-              <span className="block text-sm text-zinc-400 group-hover:text-orange-300 transition-colors duration-300">
-                {item.label}
-              </span>
+              {item.label}
             </Link>
           ))}
           <div className="mt-4 border-t border-white/[0.08] pt-6">

@@ -23,8 +23,7 @@ const featuredOffers: FeaturedOffer[] = [
     restaurant: "Burger House",
     price: 7000,
     oldPrice: 14000,
-    image:
-      "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=85",
+    image: "/images/burger.svg",
     eta: "18-28 min",
     rating: "4.9",
   },
@@ -34,8 +33,7 @@ const featuredOffers: FeaturedOffer[] = [
     restaurant: "Pizza Time",
     price: 12000,
     oldPrice: 24000,
-    image:
-      "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=600&q=85",
+    image: "/images/pizza.svg",
     eta: "25-35 min",
     rating: "4.8",
   },
@@ -45,8 +43,7 @@ const featuredOffers: FeaturedOffer[] = [
     restaurant: "Mama's Kitchen",
     price: 9500,
     oldPrice: 13000,
-    image:
-      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=600&q=85",
+    image: "/images/spice-route.svg",
     eta: "20-30 min",
     rating: "4.7",
   },

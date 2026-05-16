@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 540" role="img" aria-label="Chicken and chips">
+  <rect width="900" height="540" fill="#1f2937"/>
+  <rect x="270" y="210" width="360" height="190" rx="40" fill="#fef3c7"/>
+  <path d="M330 180h38v140h-38zM410 165h38v155h-38zM490 175h38v145h-38z" fill="#facc15"/>
+  <ellipse cx="530" cy="305" rx="90" ry="58" fill="#b45309"/>
+  <circle cx="590" cy="270" r="34" fill="#92400e"/>
+  <text x="56" y="486" fill="#fef3c7" font-family="Arial, sans-serif" font-size="54" font-weight="700">Chipsi Point</text>
+</svg>

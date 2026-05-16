@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 540" role="img" aria-label="Drinks">
+  <rect width="900" height="540" fill="#0e7490"/>
+  <path d="M360 150h180l-25 260H385Z" fill="#ecfeff"/>
+  <path d="M383 250h134l-15 135H398Z" fill="#fb923c"/>
+  <path d="M510 130c55-45 93-35 118-2" stroke="#cffafe" stroke-width="18" fill="none" stroke-linecap="round"/>
+  <text x="56" y="486" fill="#ecfeff" font-family="Arial, sans-serif" font-size="54" font-weight="700">Fresh Drinks</text>
+</svg>

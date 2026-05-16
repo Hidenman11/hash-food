@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 540" role="img" aria-label="Spiced rice">
+  <rect width="900" height="540" fill="#3f1d0b"/>
+  <ellipse cx="450" cy="315" rx="280" ry="118" fill="#f8fafc"/>
+  <ellipse cx="450" cy="292" rx="238" ry="88" fill="#f59e0b"/>
+  <circle cx="362" cy="266" r="34" fill="#b91c1c"/>
+  <circle cx="488" cy="286" r="28" fill="#7c2d12"/>
+  <circle cx="548" cy="245" r="20" fill="#15803d"/>
+  <path d="M300 205c95-55 195-58 300 0" fill="none" stroke="#fed7aa" stroke-width="18" stroke-linecap="round"/>
+  <text x="56" y="486" fill="#fff7ed" font-family="Arial, sans-serif" font-size="54" font-weight="700">Spice Route</text>
+</svg>

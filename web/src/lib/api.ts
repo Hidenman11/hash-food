@@ -184,11 +184,17 @@ export type RestaurantSummary = {
   slug: string;
   description?: string | null;
   city: string;
+  location?: string | null;
   address?: string | null;
   lat: number | null;
   lng: number | null;
   deliveryFeeTzs: number;
   menuCount: number;
+  rating?: number;
+  deliveryMins?: string;
+  distanceKm?: number;
+  image?: string | null;
+  tags?: string[];
 };
 
 export type RestaurantDetails = RestaurantSummary & {
@@ -319,21 +325,21 @@ export async function getRestaurants(query?: string, city?: string): Promise<Res
   const params = new URLSearchParams();
   if (query) params.set("q", query);
   if (city) params.set("city", city);
-  const url = `${API_BASE_URL}/v1/restaurants${params.toString() ? `?${params.toString()}` : ""}`;
+  const url = `/api/restaurants${params.toString() ? `?${params.toString()}` : ""}`;
   const json = await fetchJson<{ data: RestaurantSummary[] }>(url);
-  return json.data;
+  return Array.isArray(json.data) ? json.data : [];
 }
 
 export async function getRestaurantDetails(slug: string): Promise<RestaurantDetails> {
-  const url = `${API_BASE_URL}/v1/restaurants/${encodeURIComponent(slug)}`;
+  const url = `/api/restaurants/${encodeURIComponent(slug)}`;
   const json = await fetchJson<{ data: RestaurantDetails }>(url);
   return json.data;
 }
 
 export async function getRestaurantMenu(slug: string): Promise<MenuItem[]> {
-  const url = `${API_BASE_URL}/v1/restaurants/${encodeURIComponent(slug)}/menu`;
+  const url = `/api/restaurants/${encodeURIComponent(slug)}/menu`;
   const json = await fetchJson<{ data: MenuItem[] }>(url);
-  return json.data;
+  return Array.isArray(json.data) ? json.data : [];
 }
 
 export async function createOrder(payload: OrderCreateRequest): Promise<{ data: OrderResponse }> {

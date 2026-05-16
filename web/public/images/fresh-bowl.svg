@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 540" role="img" aria-label="Fresh bowl">
+  <rect width="900" height="540" fill="#064e3b"/>
+  <ellipse cx="450" cy="300" rx="260" ry="130" fill="#f8fafc"/>
+  <ellipse cx="450" cy="275" rx="218" ry="96" fill="#16a34a"/>
+  <circle cx="372" cy="250" r="38" fill="#bef264"/>
+  <circle cx="462" cy="282" r="34" fill="#f97316"/>
+  <circle cx="540" cy="235" r="32" fill="#fde047"/>
+  <path d="M320 325c86 36 182 39 272 0" fill="none" stroke="#0f766e" stroke-width="22" stroke-linecap="round"/>
+  <text x="56" y="486" fill="#ecfdf5" font-family="Arial, sans-serif" font-size="54" font-weight="700">Fresh Bowl</text>
+</svg>

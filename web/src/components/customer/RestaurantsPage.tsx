@@ -6,14 +6,9 @@ import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/cn";
 import { formatTzs } from "./customer-data";
 import { getRestaurants, type RestaurantSummary } from "@/lib/api";
+import { FALLBACK_IMAGE } from "@/lib/sample-restaurants";
 
 const filters = ["All", "Pizza", "Chicken", "Rice", "Burger", "Healthy", "Dessert"] as const;
-const defaultRestaurantImages: Record<string, string> = {
-  "pizza-time": "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=900&q=85",
-  "burger-house": "https://images.unsplash.com/photo-1553979459-b888fc870885?auto=format&fit=crop&w=900&q=85",
-  "spice-route": "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=900&q=85",
-  "fresh-bowl": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=85",
-};
 
 type RestaurantsPageProps = {
   initialQuery?: string;
@@ -26,7 +21,22 @@ function matchCategoryFilter(name: string, description: string | null | undefine
 }
 
 function getRestaurantImage(restaurant: RestaurantSummary) {
-  return defaultRestaurantImages[restaurant.slug] ?? "/images/meal.svg";
+  return restaurant.image || FALLBACK_IMAGE;
+}
+
+function SafeRestaurantImage({ restaurant }: { restaurant: RestaurantSummary }) {
+  const [src, setSrc] = useState(getRestaurantImage(restaurant));
+
+  return (
+    <Image
+      src={src}
+      alt={restaurant.name}
+      fill
+      className="object-cover transition duration-700 group-hover:scale-[1.03]"
+      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+      onError={() => setSrc(FALLBACK_IMAGE)}
+    />
+  );
 }
 
 function RestaurantSkeleton() {
@@ -106,7 +116,7 @@ export function RestaurantsPage({ initialQuery = "", initialCategory }: Restaura
             </p>
           </div>
 
-          <div className="rounded-2xl border border-white/[0.08] bg-gradient-to-br from-orange-500 to-amber-500 p-6 text-zinc-950 sm:p-8">
+          <div className="rounded-2xl border border-orange-300/30 bg-gradient-to-br from-orange-500 to-amber-500 p-6 text-zinc-950 sm:p-8">
             <p className="text-sm font-bold uppercase tracking-[0.2em]">Today special</p>
             <h2 className="mt-3 text-3xl font-black tracking-tight">50% off pizza orders</h2>
             <p className="mt-3 text-sm font-medium text-zinc-800">Use code HASHFIRST on checkout. Minimum order TSh 12,000.</p>
@@ -188,19 +198,19 @@ export function RestaurantsPage({ initialQuery = "", initialCategory }: Restaura
         ) : (
           <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {visibleRestaurants.map((restaurant) => (
-              <article key={restaurant.id} className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c1119]">
+              <article
+                key={restaurant.id}
+                className="group overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c1119] shadow-[0_24px_60px_-36px_rgba(0,0,0,0.95)] transition hover:-translate-y-1 hover:border-orange-400/35"
+              >
                 <div className="relative aspect-[5/3] bg-[#111]">
-                  <Image
-                    src={getRestaurantImage(restaurant)}
-                    alt={restaurant.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-                  />
+                  <SafeRestaurantImage key={restaurant.image ?? restaurant.slug} restaurant={restaurant} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent" />
-                  <div className="absolute inset-x-0 top-0 p-3">
+                  <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-3 p-3">
                     <span className="rounded-full bg-black/65 px-3 py-1 text-xs font-bold text-amber-300">
-                      {restaurant.menuCount} items
+                      {restaurant.rating?.toFixed(1) ?? "4.5"} rating
+                    </span>
+                    <span className="rounded-full bg-black/65 px-3 py-1 text-xs font-bold text-white">
+                      {restaurant.deliveryMins ?? "20-35 min"}
                     </span>
                   </div>
                 </div>
@@ -210,11 +220,17 @@ export function RestaurantsPage({ initialQuery = "", initialCategory }: Restaura
                       <h2 className="text-xl font-semibold text-white">{restaurant.name}</h2>
                       <p className="mt-1 text-sm text-zinc-500">{restaurant.description ?? "Fast, local dining"}</p>
                     </div>
-                    <span className="rounded-xl bg-white/[0.06] px-3 py-2 text-xs font-semibold text-zinc-300">
+                    <span className="shrink-0 rounded-xl bg-white/[0.06] px-3 py-2 text-xs font-semibold text-zinc-300">
                       {restaurant.city}
                     </span>
                   </div>
                   <div className="mt-5 grid gap-2 text-sm text-zinc-400">
+                    <div className="flex items-center justify-between gap-4">
+                      <span>Location</span>
+                      <span className="text-right text-zinc-200">
+                        {restaurant.location ?? restaurant.address ?? restaurant.city}
+                      </span>
+                    </div>
                     <div className="flex items-center justify-between">
                       <span>Delivery fee</span>
                       <span className="font-semibold text-orange-300">{formatTzs(restaurant.deliveryFeeTzs)}</span>
@@ -223,6 +239,12 @@ export function RestaurantsPage({ initialQuery = "", initialCategory }: Restaura
                       <span>Menu items</span>
                       <span>{restaurant.menuCount}</span>
                     </div>
+                    {typeof restaurant.distanceKm === "number" ? (
+                      <div className="flex items-center justify-between">
+                        <span>Distance</span>
+                        <span>{restaurant.distanceKm.toFixed(1)} km</span>
+                      </div>
+                    ) : null}
                   </div>
                   <Link
                     href={`/restaurants/${restaurant.slug}`}

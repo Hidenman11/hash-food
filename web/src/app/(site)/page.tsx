@@ -4,45 +4,38 @@ import { FeaturedOfferCard } from "@/components/customer/FeaturedOfferCard";
 import { RestaurantCard } from "@/components/home/RestaurantCard";
 import { Container } from "@/components/ui/Container";
 
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=2200&q=85";
+const HERO_IMAGE = "/images/hero-food.svg";
 
 const categories = [
   {
     name: "Pizza",
     count: "24 items",
-    image:
-      "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80",
+    image: "/images/pizza.svg",
   },
   {
     name: "Burger",
     count: "18 items",
-    image:
-      "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=400&q=80",
+    image: "/images/burger.svg",
   },
   {
     name: "Chicken",
     count: "32 items",
-    image:
-      "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=400&q=80",
+    image: "/images/chicken.svg",
   },
   {
     name: "Rice",
     count: "15 items",
-    image:
-      "https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=400&q=80",
+    image: "/images/rice.svg",
   },
   {
     name: "Drinks",
     count: "40 items",
-    image:
-      "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=400&q=80",
+    image: "/images/drinks.svg",
   },
   {
     name: "Snacks",
     count: "22 items",
-    image:
-      "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=400&q=80",
+    image: "/images/chicken.svg",
   },
 ] as const;
 
@@ -50,8 +43,7 @@ const restaurants = [
   {
     name: "Pizza Time",
     cuisines: "Italian · Pizza · Pasta",
-    image:
-      "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=900&q=85",
+    image: "/images/pizza.svg",
     imageAlt: "Wood-fired pizza",
     rating: "4.6",
     deliveryMins: "20–30 min",
@@ -63,8 +55,7 @@ const restaurants = [
   {
     name: "Burger House",
     cuisines: "American · Burgers · Fries",
-    image:
-      "https://images.unsplash.com/photo-1553979459-b888fc870885?auto=format&fit=crop&w=900&q=85",
+    image: "/images/burger.svg",
     imageAlt: "Gourmet burger",
     rating: "4.8",
     deliveryMins: "15–25 min",
@@ -76,8 +67,7 @@ const restaurants = [
   {
     name: "Spice Route",
     cuisines: "Indian · Curry · Biryani",
-    image:
-      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=900&q=85",
+    image: "/images/spice-route.svg",
     imageAlt: "Curry spread",
     rating: "4.5",
     deliveryMins: "25–35 min",
@@ -89,8 +79,7 @@ const restaurants = [
   {
     name: "Fresh Bowl",
     cuisines: "Healthy · Salads · Bowls",
-    image:
-      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=85",
+    image: "/images/fresh-bowl.svg",
     imageAlt: "Veggie bowl",
     rating: "4.7",
     deliveryMins: "18–28 min",
@@ -102,8 +91,7 @@ const restaurants = [
   {
     name: "Sushi Zen",
     cuisines: "Japanese · Sushi · Ramen",
-    image:
-      "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=900&q=85",
+    image: "/images/placeholder.png",
     imageAlt: "Sushi platter",
     rating: "4.9",
     deliveryMins: "30–40 min",
@@ -115,8 +103,7 @@ const restaurants = [
   {
     name: "Sweet Corner",
     cuisines: "Desserts · Bakery · Coffee",
-    image:
-      "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=900&q=85",
+    image: "/images/dessert.svg",
     imageAlt: "Desserts",
     rating: "4.4",
     deliveryMins: "12–22 min",

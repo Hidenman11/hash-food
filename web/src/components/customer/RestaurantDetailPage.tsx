@@ -10,16 +10,10 @@ import {
   type MenuItem,
   type RestaurantDetails,
 } from "@/lib/api";
+import { FALLBACK_IMAGE } from "@/lib/sample-restaurants";
 
 type RestaurantDetailPageProps = {
   slug: string;
-};
-
-const restaurantImages: Record<string, string> = {
-  "pizza-time": "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=1200&q=85",
-  "burger-house": "https://images.unsplash.com/photo-1553979459-b888fc870885?auto=format&fit=crop&w=1200&q=85",
-  "spice-route": "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=1200&q=85",
-  "fresh-bowl": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=85",
 };
 
 const cartStorageKey = "hashfood_cart";
@@ -81,7 +75,7 @@ export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
       restaurant: restaurant.name,
       name: item.name,
       price: item.priceTzs,
-      image: item.imageUrl ?? "/images/meal.svg",
+      image: item.imageUrl ?? FALLBACK_IMAGE,
       quantity: 1,
     };
 
@@ -136,7 +130,7 @@ export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
             <div className="relative mt-6 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c1119]">
               <div className="relative min-h-72">
                 <Image
-                  src={restaurantImages[restaurant.slug] ?? "/images/meal.svg"}
+                  src={restaurant.image ?? FALLBACK_IMAGE}
                   alt={restaurant.name}
                   fill
                   priority
@@ -180,7 +174,7 @@ export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
                     >
                       <div className="relative min-h-36 overflow-hidden rounded-xl bg-zinc-900">
                         <Image
-                          src={item.imageUrl ?? "/images/meal.svg"}
+                          src={item.imageUrl ?? FALLBACK_IMAGE}
                           alt={item.name}
                           fill
                           className="object-cover"

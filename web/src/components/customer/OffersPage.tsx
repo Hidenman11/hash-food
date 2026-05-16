@@ -14,29 +14,25 @@ const offerCartItems: Record<
     name: "Chicken pizza offer",
     price: 12000,
     restaurant: "Pizza Time",
-    image:
-      "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=600&q=85",
+    image: "/images/pizza.svg",
   },
   freebike: {
     name: "Chips mayai delivery offer",
     price: 6000,
     restaurant: "Chipsi Point",
-    image:
-      "https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?auto=format&fit=crop&w=600&q=85",
+    image: "/images/chicken.svg",
   },
   lunch20: {
     name: "Beef pilau lunch combo",
     price: 9500,
     restaurant: "Mama's Kitchen",
-    image:
-      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=600&q=85",
+    image: "/images/spice-route.svg",
   },
   sweet2: {
     name: "Dessert combo offer",
     price: 6000,
     restaurant: "Sweet Corner",
-    image:
-      "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=600&q=85",
+    image: "/images/dessert.svg",
   },
 };
 

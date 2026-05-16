@@ -80,28 +80,28 @@ const initialMenu: MenuItem[] = [
     name: "Spicy Chicken Pizza",
     price: "TSh 19,000",
     available: true,
-    image: "https://images.unsplash.com/photo-1548365328-5cb9ae8cbe2e?auto=format&fit=crop&w=600&q=80",
+    image: "/images/pizza.svg",
   },
   {
     id: "2",
     name: "Beef Pilau",
     price: "TSh 14,500",
     available: true,
-    image: "https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=600&q=80",
+    image: "/images/spice-route.svg",
   },
   {
     id: "3",
     name: "Hash Burger",
     price: "TSh 11,200",
     available: false,
-    image: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80",
+    image: "/images/burger.svg",
   },
   {
     id: "4",
     name: "Sushi Delight",
     price: "TSh 23,000",
     available: true,
-    image: "https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=600&q=80",
+    image: "/images/fresh-bowl.svg",
   },
 ];
 
@@ -546,7 +546,7 @@ export function RestaurantDashboard() {
         name,
         price,
         available: true,
-        image: "/images/meal.svg",
+        image: "/images/placeholder.png",
       },
     ]);
   };
