@@ -138,7 +138,7 @@ export default function AdminDashboardPage() {
               Settlement mix
             </p>
             <h3 className="mt-1 text-lg font-semibold text-white">Revenue by channel</h3>
-            <p className="mt-1 text-xs text-zinc-600">Share of GMV by payment rail (mock)</p>
+            <p className="mt-1 text-xs text-zinc-600">Share of GMV by payment rail</p>
           </div>
           <div className="mt-6">
             <RevenueBarChartClient />
@@ -300,7 +300,36 @@ export default function AdminDashboardPage() {
                   <span className="text-zinc-300">Riders</span>
                 </div>
               </div>
-              <DeliveryMap />
+              <DeliveryMap
+                deliveries={stats.activeDeliveries
+                  .filter((delivery) => (
+                    delivery.restaurant.lat !== null &&
+                    delivery.restaurant.lng !== null &&
+                    delivery.rider?.lat !== null &&
+                    delivery.rider?.lng !== null
+                  ))
+                  .map((delivery) => ({
+                    id: delivery.id,
+                    customer: {
+                      name: delivery.customer.name,
+                      lat: delivery.restaurant.lat ?? -2.5164,
+                      lng: delivery.restaurant.lng ?? 32.9175,
+                    },
+                    restaurant: {
+                      name: delivery.restaurant.name,
+                      lat: delivery.restaurant.lat ?? -2.5164,
+                      lng: delivery.restaurant.lng ?? 32.9175,
+                    },
+                    rider: delivery.rider
+                      ? {
+                          name: delivery.rider.name,
+                          lat: delivery.rider.lat ?? delivery.restaurant.lat ?? -2.5164,
+                          lng: delivery.rider.lng ?? delivery.restaurant.lng ?? 32.9175,
+                        }
+                      : null,
+                    status: delivery.status,
+                  }))}
+              />
             </div>
           </div>
         </div>

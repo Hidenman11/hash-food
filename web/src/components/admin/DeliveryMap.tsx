@@ -43,30 +43,13 @@ interface MapConfig {
   mapId: string | null;
 }
 
-interface DeliveryLocation {
+export interface DeliveryLocation {
   id: string;
   customer: { name: string; lat: number; lng: number };
   restaurant: { name: string; lat: number; lng: number };
   rider: { name: string; lat: number; lng: number } | null;
   status: string;
 }
-
-const mockDeliveries: DeliveryLocation[] = [
-  {
-    id: '#HF2040',
-    customer: { name: 'Juma M.', lat: -2.5164, lng: 32.9175 },
-    restaurant: { name: 'Burger House', lat: -2.5184, lng: 32.9155 },
-    rider: { name: 'Sarah M.', lat: -2.5174, lng: 32.9165 },
-    status: 'On the way',
-  },
-  {
-    id: '#HF2039',
-    customer: { name: 'Neema R.', lat: -2.5144, lng: 32.9195 },
-    restaurant: { name: 'Spice Route', lat: -2.5164, lng: 32.9175 },
-    rider: { name: 'Mike T.', lat: -2.5154, lng: 32.9185 },
-    status: 'Preparing',
-  },
-];
 
 function markerIcon(label: string, color: string) {
   return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
@@ -77,7 +60,7 @@ function markerIcon(label: string, color: string) {
   `);
 }
 
-export default function DeliveryMap() {
+export default function DeliveryMap({ deliveries = [] }: { deliveries?: DeliveryLocation[] }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [config, setConfig] = useState<MapConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -98,7 +81,7 @@ export default function DeliveryMap() {
     if (!config?.googleMapsApiKey || !mapRef.current) return;
 
     const addDeliveryMarkers = (mapInstance: GoogleMap) => {
-      mockDeliveries.forEach((delivery) => {
+      deliveries.forEach((delivery) => {
         new window.google!.maps.Marker({
           position: delivery.customer,
           map: mapInstance,
@@ -174,7 +157,7 @@ export default function DeliveryMap() {
     } else {
       initializeMap();
     }
-  }, [config]);
+  }, [config, deliveries]);
 
   if (error) {
     return (
