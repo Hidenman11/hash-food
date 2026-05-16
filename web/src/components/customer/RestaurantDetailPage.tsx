@@ -32,6 +32,7 @@ type CartItem = {
 export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
   const [restaurant, setRestaurant] = useState<RestaurantDetails | null>(null);
   const [menu, setMenu] = useState<MenuItem[]>([]);
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cartMessage, setCartMessage] = useState("");
@@ -50,6 +51,7 @@ export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
         if (!active) return;
         setRestaurant(details);
         setMenu(items);
+        setSelectedItem(items[0] ?? null);
       })
       .catch((err) => {
         if (!active) return;
@@ -159,7 +161,42 @@ export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
             </div>
 
             <div className="mt-6">
-              <h2 className="text-xl font-semibold text-white">Available dishes</h2>
+              <div className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr]">
+                <div className="h-fit rounded-2xl border border-white/[0.08] bg-[#0c1119] p-4 lg:sticky lg:top-24">
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-orange-300">
+                    Food detail
+                  </p>
+                  <div className="relative mt-4 aspect-[4/3] overflow-hidden rounded-2xl bg-zinc-900">
+                    <SafeImage
+                      src={selectedItem?.imageUrl ?? restaurant.image ?? FALLBACK_IMAGE}
+                      alt={selectedItem?.name ?? restaurant.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 420px"
+                    />
+                  </div>
+                  <h2 className="mt-4 text-2xl font-semibold text-white">
+                    {selectedItem?.name ?? "Choose a dish"}
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-zinc-500">
+                    {selectedItem?.description ?? "Chagua chakula upande wa kulia kuona picha na taarifa zake hapa."}
+                  </p>
+                  {selectedItem ? (
+                    <div className="mt-5 flex items-center justify-between gap-3">
+                      <p className="text-xl font-bold text-orange-300">{formatTzs(selectedItem.priceTzs)}</p>
+                      <button
+                        type="button"
+                        onClick={() => addToCart(selectedItem)}
+                        className="min-h-11 rounded-xl bg-orange-500 px-5 text-sm font-bold text-zinc-950 transition hover:bg-orange-400"
+                      >
+                        Add to cart
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-semibold text-white">Available dishes</h2>
               {cartMessage ? (
                 <div className="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
                   {cartMessage}. <Link href="/cart" className="font-semibold text-white">Open cart</Link>
@@ -170,7 +207,12 @@ export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
                   {menu.map((item) => (
                     <article
                       key={item.id}
-                      className="grid gap-4 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c1119] p-4 sm:grid-cols-[9rem_1fr]"
+                      className={`grid gap-4 overflow-hidden rounded-2xl border bg-[#0c1119] p-4 transition sm:grid-cols-[9rem_1fr] ${
+                        selectedItem?.id === item.id
+                          ? "border-orange-400/50 shadow-[0_20px_60px_-36px_rgba(249,115,22,0.9)]"
+                          : "border-white/[0.08] hover:border-white/15"
+                      }`}
+                      onClick={() => setSelectedItem(item)}
                     >
                       <div className="relative min-h-36 overflow-hidden rounded-xl bg-zinc-900">
                         <SafeImage
@@ -195,7 +237,11 @@ export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
                         </div>
                         <button
                           type="button"
-                          onClick={() => addToCart(item)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setSelectedItem(item);
+                            addToCart(item);
+                          }}
                           className="min-h-11 rounded-xl bg-orange-500 px-4 text-sm font-bold text-zinc-950 transition hover:bg-orange-400"
                         >
                           Add to cart
@@ -209,6 +255,8 @@ export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
                   No menu items available right now. Check back soon.
                 </div>
               )}
+                </div>
+              </div>
             </div>
           </>
         ) : null}

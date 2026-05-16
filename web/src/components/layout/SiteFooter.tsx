@@ -14,7 +14,7 @@ const customers = [
   { label: "How it works", href: "/#how-it-works" },
   { label: "Offers", href: "/offers" },
   { label: "Track order", href: "/track" },
-  { label: "Help center", href: "/support" },
+  { label: "Help center", href: "#help-center" },
 ] as const;
 
 const restaurants = [

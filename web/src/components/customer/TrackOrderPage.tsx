@@ -282,7 +282,16 @@ export function TrackOrderPage() {
                     <div className="rounded-2xl border border-white/[0.08] bg-black/25 p-4">
                       <p className="text-sm font-semibold text-zinc-500">Payment</p>
                       <p className="mt-2 text-xl font-semibold text-white">{formatTzs(activeOrder.totalTzs)}</p>
-                      <p className="mt-1 text-sm text-emerald-300">{statusLabel(activeOrder.status)}</p>
+                      <p className="mt-1 text-sm text-emerald-300">
+                        {activeOrder.payment
+                          ? `${activeOrder.payment.method} - ${activeOrder.payment.status.replace(/_/g, " ")}`
+                          : statusLabel(activeOrder.status)}
+                      </p>
+                      {activeOrder.payment?.reference ? (
+                        <p className="mt-2 font-mono text-xs text-zinc-500">
+                          Ref: {activeOrder.payment.reference}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
                 </div>

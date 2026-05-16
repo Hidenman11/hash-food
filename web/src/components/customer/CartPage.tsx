@@ -68,6 +68,8 @@ export function CartPage() {
   const [promoCode, setPromoCode] = useState("");
   const [appliedCode, setAppliedCode] = useState("");
   const [payment, setPayment] = useState<(typeof paymentMethods)[number]>("M-Pesa");
+  const [paymentPhone, setPaymentPhone] = useState("");
+  const [paymentReference, setPaymentReference] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [note, setNote] = useState("");
   const [placed, setPlaced] = useState(false);
@@ -85,6 +87,7 @@ export function CartPage() {
   const deliveryFee = cart.length ? 3000 : 0;
   const discount = appliedCode ? Math.min(Math.round(subtotal * 0.2), 8000) : 0;
   const total = Math.max(subtotal + deliveryFee - discount, 0);
+  const requiresMobileMoney = payment !== "Cash";
 
   function updateQuantity(id: string, change: number) {
     setCart((items) =>
@@ -115,11 +118,34 @@ export function CartPage() {
     }
   }
 
+  function normalizePhone(value: string) {
+    const digits = value.replace(/\D/g, "");
+    if (digits.startsWith("0")) return `255${digits.slice(1)}`;
+    return digits;
+  }
+
+  function isValidPaymentPhone(value: string) {
+    return /^255(6|7)\d{8}$/.test(normalizePhone(value));
+  }
+
+  async function simulatePayment(reference: string) {
+    setCheckoutMessage(
+      `${payment} payment request imetumwa kwenda ${normalizePhone(paymentPhone)}. Thibitisha kwenye simu yako...`,
+    );
+    await new Promise((resolve) => window.setTimeout(resolve, 1200));
+    setCheckoutMessage(`Malipo yamepokelewa. Reference: ${reference}`);
+  }
+
   async function checkout() {
     if (!cart.length) return;
     if (!deliveryAddress.trim()) {
       setStatus("error");
       setCheckoutMessage("Please enter a delivery address before checkout.");
+      return;
+    }
+    if (requiresMobileMoney && !isValidPaymentPhone(paymentPhone)) {
+      setStatus("error");
+      setCheckoutMessage("Weka namba sahihi ya simu ya malipo, mfano 255712345678 au 0712345678.");
       return;
     }
 
@@ -135,23 +161,47 @@ export function CartPage() {
     setCheckoutMessage("");
 
     try {
+      const reference =
+        payment === "Cash"
+          ? `COD-${Date.now().toString().slice(-6)}`
+          : `HF-PAY-${Date.now().toString().slice(-8)}`;
+
+      if (requiresMobileMoney) {
+        await simulatePayment(reference);
+      }
+
       const response = await createOrder({
         restaurantId,
         deliveryAddress: deliveryAddress.trim(),
-        notes: note.trim() || undefined,
+        notes: [
+          note.trim(),
+          payment === "Cash"
+            ? "Payment: Cash on delivery"
+            : `Payment: ${payment} ${normalizePhone(paymentPhone)} ${reference}`,
+        ]
+          .filter(Boolean)
+          .join(" | "),
+        paymentMethod: payment,
+        paymentPhone: requiresMobileMoney ? normalizePhone(paymentPhone) : undefined,
+        paymentReference: reference,
+        paymentStatus: payment === "Cash" ? "CASH_ON_DELIVERY" : "PAID",
         items: normalizedCart.map((item) => ({ menuItemId: item.menuItemId, quantity: item.quantity })),
       });
 
+      setPaymentReference(reference);
       setPlaced(true);
       setStatus("success");
       setCheckoutMessage(
-        `Order placed successfully${response?.data?.id ? `: ${response.data.id}` : ""}. You can track it on the Track Order page.`,
+        payment === "Cash"
+          ? `Order placed successfully${response?.data?.id ? `: ${response.data.id}` : ""}. Utalipa cash wakati wa delivery.`
+          : `Payment confirmed (${reference}). Order placed${response?.data?.id ? `: ${response.data.id}` : ""}.`,
       );
       setCart([]);
       setAppliedCode("");
       setPromoCode("");
       setDeliveryAddress("");
       setNote("");
+      setPaymentPhone("");
     } catch (error) {
       setStatus("error");
       setCheckoutMessage(
@@ -316,6 +366,26 @@ export function CartPage() {
               </div>
             </div>
 
+            {requiresMobileMoney ? (
+              <label className="mt-5 block">
+                <span className="text-sm font-semibold text-zinc-300">{payment} phone number</span>
+                <input
+                  value={paymentPhone}
+                  onChange={(event) => setPaymentPhone(event.target.value)}
+                  placeholder="255712345678"
+                  inputMode="tel"
+                  className="mt-2 w-full rounded-xl border border-white/[0.08] bg-black/25 px-3 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-orange-400/50"
+                />
+                <span className="mt-2 block text-xs leading-5 text-zinc-600">
+                  Tutatuma ombi la malipo kwenye simu hii kisha tutatoa transaction reference.
+                </span>
+              </label>
+            ) : (
+              <p className="mt-5 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                Cash on delivery imechaguliwa. Order itathibitishwa, malipo yatafanyika wakati wa delivery.
+              </p>
+            )}
+
             <label className="mt-5 block">
               <span className="text-sm font-semibold text-zinc-300">Delivery address</span>
               <input
@@ -371,7 +441,7 @@ export function CartPage() {
 
             {placed && status !== "error" && (
               <p className="mt-5 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                Order imewekwa kwa {payment}. Unaweza kuifuatilia kwenye Track Order.
+                Order imewekwa kwa {payment}{paymentReference ? ` (${paymentReference})` : ""}. Unaweza kuifuatilia kwenye Track Order.
               </p>
             )}
 

@@ -223,6 +223,10 @@ export type OrderCreateRequest = {
   deliveryLat?: number;
   deliveryLng?: number;
   notes?: string;
+  paymentMethod?: string;
+  paymentPhone?: string;
+  paymentReference?: string;
+  paymentStatus?: "PENDING" | "PAID" | "CASH_ON_DELIVERY";
   items: Array<{ menuItemId: string; quantity: number }>;
 };
 
@@ -278,6 +282,12 @@ export type OrderDetails = {
       name: string;
     };
   }>;
+  payment?: {
+    method: string;
+    phone: string | null;
+    reference: string | null;
+    status: "PENDING" | "PAID" | "CASH_ON_DELIVERY";
+  };
 };
 
 export type RiderProfile = {
@@ -369,7 +379,7 @@ function buildLocalOrder(payload: OrderCreateRequest): OrderDetails {
     customerId: "local-customer",
     restaurantId: restaurant.id,
     riderId: "local-rider",
-    status: "EN_ROUTE",
+    status: payload.paymentStatus === "CASH_ON_DELIVERY" ? "CONFIRMED" : "PAID",
     totalTzs: subtotalTzs + deliveryFeeTzs,
     subtotalTzs,
     deliveryFeeTzs,
@@ -403,6 +413,12 @@ function buildLocalOrder(payload: OrderCreateRequest): OrderDetails {
       },
     },
     items,
+    payment: {
+      method: payload.paymentMethod ?? "M-Pesa",
+      phone: payload.paymentPhone ?? null,
+      reference: payload.paymentReference ?? null,
+      status: payload.paymentStatus ?? "PAID",
+    },
   };
 }
 
