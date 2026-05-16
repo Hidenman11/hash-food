@@ -102,6 +102,93 @@ export function createAdminRouter() {
     }
   });
 
+  router.get("/activity", requireAuth, requireRole("ADMIN"), async (_req, res) => {
+    try {
+      const [orders, users, restaurants, riders, payments] = await Promise.all([
+        prisma.order.findMany({
+          take: 25,
+          orderBy: { updatedAt: "desc" },
+          include: {
+            customer: { select: { fullName: true, email: true } },
+            restaurant: { select: { name: true } },
+            rider: { select: { user: { select: { fullName: true } } } },
+          },
+        }),
+        prisma.user.findMany({
+          take: 15,
+          orderBy: { createdAt: "desc" },
+          select: { id: true, email: true, fullName: true, role: true, createdAt: true },
+        }),
+        prisma.restaurant.findMany({
+          take: 15,
+          orderBy: { updatedAt: "desc" },
+          select: { id: true, name: true, isActive: true, updatedAt: true, createdAt: true },
+        }),
+        prisma.rider.findMany({
+          take: 15,
+          orderBy: { updatedAt: "desc" },
+          include: { user: { select: { fullName: true, email: true } } },
+        }),
+        prisma.payment.findMany({
+          take: 15,
+          orderBy: { updatedAt: "desc" },
+          include: { order: { include: { customer: { select: { fullName: true, email: true } } } } },
+        }),
+      ]);
+
+      const activity = [
+        ...orders.map((order) => ({
+          id: `order-${order.id}`,
+          type: "order" as const,
+          action: `Order ${order.status.replace(/_/g, " ")}`,
+          details: `${order.customer.fullName || order.customer.email} ordered from ${order.restaurant.name}`,
+          timestamp: order.updatedAt,
+          user: order.rider?.user.fullName || order.customer.fullName || order.customer.email,
+        })),
+        ...users.map((user) => ({
+          id: `user-${user.id}`,
+          type: "user" as const,
+          action: `${user.role.replace(/_/g, " ")} registered`,
+          details: `${user.fullName || user.email} joined the platform`,
+          timestamp: user.createdAt,
+          user: user.fullName || user.email,
+        })),
+        ...restaurants.map((restaurant) => ({
+          id: `restaurant-${restaurant.id}`,
+          type: "restaurant" as const,
+          action: restaurant.isActive ? "Restaurant active" : "Restaurant offline",
+          details: `${restaurant.name} profile updated`,
+          timestamp: restaurant.updatedAt || restaurant.createdAt,
+          user: restaurant.name,
+        })),
+        ...riders.map((rider) => ({
+          id: `rider-${rider.id}`,
+          type: "rider" as const,
+          action: rider.isOnline ? "Rider online" : "Rider offline",
+          details: `${rider.user.fullName || rider.user.email} location/status updated`,
+          timestamp: rider.updatedAt,
+          user: rider.user.fullName || rider.user.email,
+        })),
+        ...payments.map((payment) => ({
+          id: `payment-${payment.id}`,
+          type: "payment" as const,
+          action: `Payment ${payment.status}`,
+          details: `${payment.provider} payment for ${payment.order.customer.fullName || payment.order.customer.email}`,
+          timestamp: payment.updatedAt,
+          user: payment.order.customer.fullName || payment.order.customer.email,
+        })),
+      ]
+        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+        .slice(0, 60)
+        .map((item) => ({ ...item, timestamp: item.timestamp.toISOString() }));
+
+      res.json({ data: activity });
+    } catch (error) {
+      console.error("Admin activity error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Get all orders with filtering
   router.get("/orders", requireAuth, requireRole("ADMIN"), async (req, res) => {
     try {

@@ -22,11 +22,25 @@ const restaurantImages: Record<string, string> = {
   "fresh-bowl": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=85",
 };
 
+const cartStorageKey = "hashfood_cart";
+
+type CartItem = {
+  id: string;
+  menuItemId: string;
+  restaurantId: string;
+  restaurant: string;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
+};
+
 export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
   const [restaurant, setRestaurant] = useState<RestaurantDetails | null>(null);
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cartMessage, setCartMessage] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -56,6 +70,34 @@ export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
       active = false;
     };
   }, [slug]);
+
+  function addToCart(item: MenuItem) {
+    if (!restaurant) return;
+
+    const cartItem: CartItem = {
+      id: item.id,
+      menuItemId: item.id,
+      restaurantId: restaurant.id,
+      restaurant: restaurant.name,
+      name: item.name,
+      price: item.priceTzs,
+      image: item.imageUrl ?? "/images/meal.svg",
+      quantity: 1,
+    };
+
+    const saved = localStorage.getItem(cartStorageKey);
+    const current = saved ? (JSON.parse(saved) as CartItem[]) : [];
+    const safeCurrent = Array.isArray(current) ? current : [];
+    const nextCart = safeCurrent.some((cart) => cart.menuItemId === item.id)
+      ? safeCurrent.map((cart) =>
+          cart.menuItemId === item.id ? { ...cart, quantity: cart.quantity + 1 } : cart,
+        )
+      : [...safeCurrent.filter((cart) => cart.restaurantId === restaurant.id), cartItem];
+
+    localStorage.setItem(cartStorageKey, JSON.stringify(nextCart));
+    window.dispatchEvent(new Event("hashfood-cart-updated"));
+    setCartMessage(`${item.name} added to cart`);
+  }
 
   return (
     <section className="min-h-screen bg-[#07090d]">
@@ -124,6 +166,11 @@ export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
 
             <div className="mt-6">
               <h2 className="text-xl font-semibold text-white">Available dishes</h2>
+              {cartMessage ? (
+                <div className="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+                  {cartMessage}. <Link href="/cart" className="font-semibold text-white">Open cart</Link>
+                </div>
+              ) : null}
               {menu.length ? (
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
                   {menu.map((item) => (
@@ -140,16 +187,25 @@ export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
                           sizes="144px"
                         />
                       </div>
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex min-w-0 flex-col justify-between gap-4">
                         <div>
-                          <h3 className="text-lg font-semibold text-white">{item.name}</h3>
+                          <div className="flex items-start justify-between gap-4">
+                            <h3 className="text-lg font-semibold text-white">{item.name}</h3>
+                            <span className="shrink-0 text-sm font-semibold text-orange-300">
+                              {formatTzs(item.priceTzs)}
+                            </span>
+                          </div>
                           <p className="mt-1 text-sm text-zinc-500">
                             {item.description ?? "Chef's special"}
                           </p>
                         </div>
-                        <span className="shrink-0 text-sm font-semibold text-orange-300">
-                          {formatTzs(item.priceTzs)}
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => addToCart(item)}
+                          className="min-h-11 rounded-xl bg-orange-500 px-4 text-sm font-bold text-zinc-950 transition hover:bg-orange-400"
+                        >
+                          Add to cart
+                        </button>
                       </div>
                     </article>
                   ))}

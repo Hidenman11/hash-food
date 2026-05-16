@@ -1,67 +1,27 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getAdminStats, type AdminStats } from "@/lib/api";
-
-interface ActivityLog {
-  id: string;
-  type: 'order' | 'user' | 'rider' | 'restaurant';
-  action: string;
-  details: string;
-  timestamp: string;
-  user?: string;
-}
+import { getAdminActivity, getAdminStats, type AdminActivity, type AdminStats } from "@/lib/api";
 
 export default function AdminMonitoringPage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
+  const [activityLogs, setActivityLogs] = useState<AdminActivity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [warning, setWarning] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const result = await getAdminStats();
+        setError(null);
+        const [result, activity] = await Promise.all([getAdminStats(), getAdminActivity()]);
         setStats(result.data);
-        if (result.isFallback) {
-          setWarning("Unable to load live data, showing demo stats.");
-        }
-
-        // Generate mock activity logs based on real data
-        const logs: ActivityLog[] = [];
-
-        // Add recent orders as activities
-        result.data.recentOrders.forEach(order => {
-          logs.push({
-            id: `order-${order.id}`,
-            type: 'order',
-            action: 'New Order',
-            details: `${order.customer} ordered from ${order.restaurant}`,
-            timestamp: order.createdAt,
-            user: order.customer
-          });
-        });
-
-        // Add active deliveries
-        result.data.activeDeliveries.forEach(delivery => {
-          logs.push({
-            id: `delivery-${delivery.id}`,
-            type: 'rider',
-            action: 'Delivery Started',
-            details: `${delivery.rider?.name || 'Unassigned'} assigned to deliver from ${delivery.restaurant.name} to ${delivery.customer.name}`,
-            timestamp: new Date().toISOString(),
-            user: delivery.rider?.name
-          });
-        });
-
-        // Sort by timestamp (most recent first)
-        logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-        setActivityLogs(logs.slice(0, 20)); // Show last 20 activities
+        setActivityLogs(activity.data);
       } catch (err) {
         console.error("Admin monitoring fetch error:", err);
-        setWarning("Unable to load live data, showing demo stats.");
+        setStats(null);
+        setActivityLogs([]);
+        setError(err instanceof Error ? err.message : "Unable to load live monitoring data.");
       } finally {
         setLoading(false);
       }
@@ -74,7 +34,7 @@ export default function AdminMonitoringPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const getActivityIcon = (type: ActivityLog['type']) => {
+  const getActivityIcon = (type: AdminActivity['type']) => {
     switch (type) {
       case 'order':
         return '🛒';
@@ -89,7 +49,7 @@ export default function AdminMonitoringPage() {
     }
   };
 
-  const getActivityColor = (type: ActivityLog['type']) => {
+  const getActivityColor = (type: AdminActivity['type']) => {
     switch (type) {
       case 'order':
         return 'text-blue-400';
@@ -104,13 +64,22 @@ export default function AdminMonitoringPage() {
     }
   };
 
-  if (loading || !stats) {
+  if (loading) {
     return (
       <div className="space-y-8">
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
           <p className="mt-4 text-zinc-400">Loading monitoring data...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="rounded-2xl border border-red-500/25 bg-red-500/10 p-6 text-red-100">
+        <h2 className="text-lg font-semibold text-white">Live monitoring unavailable</h2>
+        <p className="mt-2 text-sm">{error ?? "Please login with an admin account and try again."}</p>
       </div>
     );
   }
@@ -122,11 +91,6 @@ export default function AdminMonitoringPage() {
         <p className="mt-1 text-sm text-zinc-500">
           Real-time activity across the entire Hash Food platform. Auto-refreshes every 30 seconds.
         </p>
-        {warning ? (
-          <div className="mt-4 rounded-2xl border border-orange-400/25 bg-orange-500/10 p-4 text-sm text-orange-200">
-            {warning}
-          </div>
-        ) : null}
       </div>
 
       {/* System Status Overview */}

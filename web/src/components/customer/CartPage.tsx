@@ -20,30 +20,7 @@ type CartItem = {
 
 const cartStorageKey = "hashfood_cart";
 
-const starterCart: CartItem[] = [
-  {
-    id: "pizza",
-    menuItemId: "pizza",
-    restaurantId: "restaurant-pizza-time",
-    restaurant: "Pizza Time",
-    name: "Chicken Pizza",
-    price: 12000,
-    image:
-      "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=900&q=85",
-    quantity: 1,
-  },
-  {
-    id: "soda",
-    menuItemId: "soda",
-    restaurantId: "restaurant-pizza-time",
-    restaurant: "Pizza Time",
-    name: "Cold Soda",
-    price: 2000,
-    image:
-      "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=85",
-    quantity: 1,
-  },
-];
+const starterCart: CartItem[] = [];
 
 const paymentMethods = ["M-Pesa", "Airtel Money", "Tigo Pesa", "Cash"] as const;
 

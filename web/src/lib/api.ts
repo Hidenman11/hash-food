@@ -1,5 +1,5 @@
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://localhost:4000";
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "";
 
 export type AuthUser = {
   id: string;
@@ -55,6 +55,15 @@ export type AdminStats = {
     status: string;
     eta: number | null;
   }>;
+};
+
+export type AdminActivity = {
+  id: string;
+  type: "order" | "user" | "rider" | "restaurant" | "payment";
+  action: string;
+  details: string;
+  timestamp: string;
+  user?: string | null;
 };
 
 export type AdminOrder = {
@@ -272,73 +281,24 @@ export type AdminAnalytics = {
   }>;
 };
 
-export const mockAdminStats: AdminStats = {
-  overview: {
-    totalOrders: 120,
-    ordersThisWeek: 28,
-    revenueThisWeek: 850000,
-    totalUsers: 45,
-    activeRiders: 12,
-    totalRestaurants: 8,
-  },
-  recentOrders: [
-    {
-      id: "mock-order-01",
-      customer: "Amina",
-      restaurant: "Spice Kitchen",
-      rider: "Rider John",
-      total: 42000,
-      status: "EN_ROUTE",
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: "mock-order-02",
-      customer: "David",
-      restaurant: "Pizza Time",
-      rider: "Rider Grace",
-      total: 78000,
-      status: "PREPARING",
-      createdAt: new Date().toISOString(),
-    },
-  ],
-  activeDeliveries: [
-    {
-      id: "mock-order-03",
-      customer: { name: "Mariam", phone: "+255700123456" },
-      restaurant: { name: "Burger House", address: "Mwanza Rd", lat: null, lng: null },
-      rider: { name: "Rider Alex", phone: "+255700987654", lat: null, lng: null },
-      status: "EN_ROUTE",
-      eta: null,
-    },
-  ],
-};
-
-export async function getAdminStats(): Promise<{ data: AdminStats; isFallback: boolean }> {
+export async function getAdminStats(): Promise<{ data: AdminStats }> {
   const token = localStorage.getItem("hashfood_token");
-  try {
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
-    const response = await fetch(`${API_BASE_URL}/v1/admin/stats`, {
-      headers,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch admin stats (${response.status})`);
-    }
-
-    const json = await response.json();
-    if (!json?.data) {
-      throw new Error("Invalid admin stats response");
-    }
-
-    return { data: json.data as AdminStats, isFallback: false };
-  } catch (error) {
-    console.error("Admin stats fetch failed:", error);
-    return { data: mockAdminStats, isFallback: true };
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
+
+  return await fetchJson<{ data: AdminStats }>(`${API_BASE_URL}/v1/admin/stats`, { headers });
+}
+
+export async function getAdminActivity(): Promise<{ data: AdminActivity[] }> {
+  const token = localStorage.getItem("hashfood_token");
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return await fetchJson<{ data: AdminActivity[] }>(`${API_BASE_URL}/v1/admin/activity`, { headers });
 }
 
 export async function getAdminOrders(params?: {

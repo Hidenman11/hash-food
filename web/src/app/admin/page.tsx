@@ -32,21 +32,20 @@ const statusStyle = (status: string) => {
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [warning, setWarning] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         setLoading(true);
+        setError(null);
         const result = await getAdminStats();
         setStats(result.data);
-        if (result.isFallback) {
-          setWarning("Unable to load live data, showing demo stats.");
-        }
       } catch (err) {
         console.error("Admin dashboard fetch error:", err);
-        setWarning("Unable to load live data, showing demo stats.");
+        setStats(null);
+        setError(err instanceof Error ? err.message : "Unable to load live admin data.");
       } finally {
         setLoading(false);
       }
@@ -55,13 +54,22 @@ export default function AdminDashboardPage() {
     fetchStats();
   }, []);
 
-  if (loading || !stats) {
+  if (loading) {
     return (
       <div className="space-y-8">
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
           <p className="mt-4 text-zinc-400">Loading dashboard data...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="rounded-2xl border border-red-500/25 bg-red-500/10 p-6 text-red-100">
+        <h2 className="text-lg font-semibold text-white">Live admin data unavailable</h2>
+        <p className="mt-2 text-sm">{error ?? "Please login with an admin account and try again."}</p>
       </div>
     );
   }
@@ -73,11 +81,6 @@ export default function AdminDashboardPage() {
         <p className="mt-1 text-sm text-zinc-500">
           Real-time snapshot of orders, revenue, and fleet health across Mwanza.
         </p>
-        {warning ? (
-          <div className="mt-4 rounded-2xl border border-orange-400/25 bg-orange-500/10 p-4 text-sm text-orange-200">
-            {warning}
-          </div>
-        ) : null}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
