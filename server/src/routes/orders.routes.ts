@@ -228,6 +228,14 @@ export function createOrdersRouter(io: SocketIOServer) {
         return;
       }
       const oid = orderIdParam(req);
+      const rider = await prisma.rider.findUnique({
+        where: { id: parsed.data.riderId },
+      });
+      if (!rider) {
+        res.status(404).json({ error: "Rider not found" });
+        return;
+      }
+
       const order = await prisma.order.update({
         where: { id: oid },
         data: { riderId: parsed.data.riderId, status: "CONFIRMED" },

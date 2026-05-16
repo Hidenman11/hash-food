@@ -2,8 +2,17 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import type { AuthUser } from "@/lib/api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  getRiderMe,
+  updateOrderStatus,
+  updateRiderMe,
+  type AuthUser,
+  type OrderDetails,
+  type OrderStatus,
+  type RiderProfile,
+} from "@/lib/api";
+import { createRealtimeSocket, type HashFoodSocket } from "@/lib/realtime";
 import { getPartnerProfile, type PartnerProfile, type PartnerRole } from "@/lib/partner-store";
 
 type PartnerDashboardProps = {
@@ -28,6 +37,27 @@ function StatCard({ label, value, tone }: { label: string; value: string; tone: 
   );
 }
 
+function formatTzs(value: number) {
+  return `TSh ${value.toLocaleString()}`;
+}
+
+function orderItems(order: OrderDetails) {
+  return order.items.map((item) => `${item.quantity}x ${item.menuItem.name}`).join(", ");
+}
+
+function nextRiderStatus(status: OrderStatus): OrderStatus | null {
+  if (status === "READY_FOR_PICKUP" || status === "CONFIRMED" || status === "PREPARING") {
+    return "PICKED_UP";
+  }
+  if (status === "PICKED_UP") return "EN_ROUTE";
+  if (status === "EN_ROUTE") return "DELIVERED";
+  return null;
+}
+
+function statusLabel(status: OrderStatus) {
+  return status.replace(/_/g, " ");
+}
+
 export function PartnerDashboard({ role }: PartnerDashboardProps) {
   const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(() =>
@@ -38,6 +68,30 @@ export function PartnerDashboard({ role }: PartnerDashboardProps) {
     const currentUser = readUser();
     return getPartnerProfile(currentUser?.email);
   });
+  const [rider, setRider] = useState<RiderProfile | null>(null);
+  const [loading, setLoading] = useState(role === "RIDER");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [realtimeState, setRealtimeState] = useState<"idle" | "connected" | "fallback">("idle");
+  const socketRef = useRef<HashFoodSocket | null>(null);
+
+  const isRestaurant = role === "RESTAURANT_ADMIN";
+  const pendingLocalVerification = Boolean(profile && profile.verificationStatus !== "verified");
+  const authorized = user?.role === role && !pendingLocalVerification;
+
+  const loadRider = useCallback(async () => {
+    if (role !== "RIDER" || !authorized) return;
+    try {
+      setLoading(true);
+      setError("");
+      const result = await getRiderMe();
+      setRider(result.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load rider profile.");
+    } finally {
+      setLoading(false);
+    }
+  }, [authorized, role]);
 
   useEffect(() => {
     const syncSession = () => {
@@ -56,24 +110,115 @@ export function PartnerDashboard({ role }: PartnerDashboardProps) {
     };
   }, []);
 
-  const isRestaurant = role === "RESTAURANT_ADMIN";
-  const authorized = user?.role === role && profile?.verificationStatus === "verified";
+  useEffect(() => {
+    if (role !== "RIDER" || !authorized) return;
+    const first = window.setTimeout(() => {
+      void loadRider();
+    }, 0);
+    const timer = window.setInterval(() => {
+      void loadRider();
+    }, 15000);
+    return () => {
+      window.clearTimeout(first);
+      window.clearInterval(timer);
+    };
+  }, [authorized, loadRider, role]);
 
-  const orders = useMemo(
-    () =>
-      isRestaurant
-        ? [
-            ["#HF2041", "Chicken Pizza", "TSh 14,000", "New"],
-            ["#HF2042", "Beef Pilau", "TSh 11,000", "Preparing"],
-            ["#HF2043", "Hash Burger", "TSh 9,000", "Ready"],
-          ]
-        : [
-            ["#HF2041", "Pizza Time", "Pickup ready", "1.2 km"],
-            ["#HF2044", "Mama's Kitchen", "Assigned", "2.8 km"],
-            ["#HF2050", "Sweet Corner", "Delivered", "0.6 km"],
-          ],
-    [isRestaurant],
+  useEffect(() => {
+    if (role !== "RIDER" || !authorized) return;
+    const nextSocket = createRealtimeSocket();
+    if (!nextSocket) {
+      const fallback = window.setTimeout(() => setRealtimeState("fallback"), 0);
+      return () => window.clearTimeout(fallback);
+    }
+
+    nextSocket.on("connect", () => setRealtimeState("connected"));
+    nextSocket.on("connect_error", () => setRealtimeState("fallback"));
+    socketRef.current = nextSocket;
+
+    return () => {
+      nextSocket.disconnect();
+      socketRef.current = null;
+      setRealtimeState("idle");
+    };
+  }, [authorized, role]);
+
+  const deliveredToday = useMemo(
+    () => rider?.orders.filter((order) => order.status === "DELIVERED").length ?? 0,
+    [rider],
   );
+
+  async function toggleOnline() {
+    if (!rider) return;
+    setMessage("");
+    setError("");
+    try {
+      const result = await updateRiderMe({ isOnline: !rider.isOnline });
+      setRider((current) => (current ? { ...current, ...result.data } : result.data));
+      setMessage(result.data.isOnline ? "Uko online kupokea delivery." : "Uko offline kwa sasa.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update online status.");
+    }
+  }
+
+  async function shareLocation() {
+    if (!navigator.geolocation) {
+      setError("Browser yako haija-support location sharing.");
+      return;
+    }
+    setMessage("Tunachukua location yako...");
+    setError("");
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const result = await updateRiderMe({
+            currentLat: position.coords.latitude,
+            currentLng: position.coords.longitude,
+            heading: position.coords.heading ?? undefined,
+          });
+          const activeOrderId = rider?.orders.find((order) =>
+            ["READY_FOR_PICKUP", "PICKED_UP", "EN_ROUTE"].includes(order.status),
+          )?.id;
+          socketRef.current?.emit(
+            "rider:location",
+            {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+              heading: position.coords.heading ?? undefined,
+              orderId: activeOrderId,
+            },
+            (response) => {
+              if (!response.ok) setRealtimeState("fallback");
+            },
+          );
+          setRider((current) => (current ? { ...current, ...result.data } : result.data));
+          setMessage("Location imetumwa kwa active delivery.");
+        } catch (err) {
+          setError(err instanceof Error ? err.message : "Failed to update location.");
+          setMessage("");
+        }
+      },
+      () => {
+        setError("Location permission imekataliwa au haikupatikana.");
+        setMessage("");
+      },
+      { enableHighAccuracy: true, maximumAge: 15000, timeout: 12000 },
+    );
+  }
+
+  async function advanceOrder(order: OrderDetails) {
+    const next = nextRiderStatus(order.status);
+    if (!next) return;
+    setMessage("");
+    setError("");
+    try {
+      await updateOrderStatus(order.id, next);
+      await loadRider();
+      setMessage(`Order #${order.id.slice(-6)} sasa iko ${statusLabel(next)}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update order status.");
+    }
+  }
 
   function signOut() {
     localStorage.removeItem("hashfood_token");
@@ -115,122 +260,156 @@ export function PartnerDashboard({ role }: PartnerDashboardProps) {
     );
   }
 
+  if (isRestaurant) {
+    return (
+      <section className="min-h-screen bg-[#07090d]">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="rounded-2xl border border-white/[0.08] bg-[#0c1119] p-6 sm:p-8">
+            <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-300">Restaurant dashboard</p>
+                <h1 className="mt-3 text-4xl font-semibold tracking-tight text-white">
+                  {profile?.displayName ?? user.fullName ?? user.email}
+                </h1>
+                <p className="mt-3 text-sm text-zinc-400">
+                  Restaurant order management bado ipo kwenye dashboard module. Rider flow sasa inaunganishwa live.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={signOut}
+                className="min-h-12 rounded-xl border border-white/[0.1] px-5 text-sm font-bold text-zinc-200 transition hover:bg-white/[0.06]"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="min-h-screen bg-[#07090d]">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-white/[0.08] bg-[#0c1119] p-6 sm:p-8">
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-300">
-                {isRestaurant ? "Restaurant dashboard" : "Rider dashboard"}
-              </p>
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-300">Rider dashboard</p>
               <h1 className="mt-3 text-4xl font-semibold tracking-tight text-white">
-                {profile?.displayName}
+                {rider?.user.fullName ?? user.fullName ?? "Delivery partner"}
               </h1>
               <p className="mt-3 text-sm text-zinc-400">
-                {profile?.city ?? "Mwanza"} · {profile?.specialty ?? (isRestaurant ? "Food partner" : "Delivery partner")}
+                {rider?.vehicleType ?? "Vehicle not set"} | {rider?.user.phone ?? "No phone saved"}
+              </p>
+              <p className="mt-3 inline-flex rounded-full border border-white/[0.08] bg-black/25 px-3 py-1 text-xs font-semibold text-zinc-400">
+                {realtimeState === "connected" ? "Live location connected" : "Location REST fallback active"}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={signOut}
-              className="min-h-12 rounded-xl border border-white/[0.1] px-5 text-sm font-bold text-zinc-200 transition hover:bg-white/[0.06]"
-            >
-              Sign out
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={toggleOnline}
+                disabled={!rider}
+                className="min-h-12 rounded-xl bg-orange-500 px-5 text-sm font-bold text-zinc-950 transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+              >
+                {rider?.isOnline ? "Go offline" : "Go online"}
+              </button>
+              <button
+                type="button"
+                onClick={shareLocation}
+                disabled={!rider?.isOnline}
+                className="min-h-12 rounded-xl border border-white/[0.1] px-5 text-sm font-bold text-zinc-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:text-zinc-600"
+              >
+                Share location
+              </button>
+              <button
+                type="button"
+                onClick={signOut}
+                className="min-h-12 rounded-xl border border-white/[0.1] px-5 text-sm font-bold text-zinc-200 transition hover:bg-white/[0.06]"
+              >
+                Sign out
+              </button>
+            </div>
           </div>
         </div>
+
+        {message ? (
+          <p className="mt-5 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
+            {message}
+          </p>
+        ) : null}
+        {error ? (
+          <p className="mt-5 rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+            {error}
+          </p>
+        ) : null}
 
         <div className="mt-5 grid gap-5 md:grid-cols-3">
-          {isRestaurant ? (
-            <>
-              <StatCard label="Today orders" value="24" tone="text-orange-300" />
-              <StatCard label="Revenue" value="TSh 456k" tone="text-emerald-300" />
-              <StatCard label="Pending prep" value="6" tone="text-sky-300" />
-            </>
-          ) : (
-            <>
-              <StatCard label="Trips today" value="12" tone="text-orange-300" />
-              <StatCard label="Earnings" value="TSh 86k" tone="text-emerald-300" />
-              <StatCard label="Online status" value="Active" tone="text-sky-300" />
-            </>
-          )}
+          <StatCard label="Assigned deliveries" value={`${rider?.orders.length ?? 0}`} tone="text-orange-300" />
+          <StatCard label="Completed today" value={`${deliveredToday}`} tone="text-emerald-300" />
+          <StatCard label="Online status" value={rider?.isOnline ? "Online" : "Offline"} tone="text-sky-300" />
         </div>
 
-        <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_22rem]">
-          <div className="rounded-2xl border border-white/[0.08] bg-[#0c1119] p-5">
-            <h2 className="text-lg font-semibold text-white">
-              {isRestaurant ? "Orders queue" : "Delivery queue"}
-            </h2>
-            <div className="mt-4 space-y-3">
-              {orders.map(([code, title, value, status]) => (
-                <div key={code} className="rounded-2xl border border-white/[0.08] bg-black/25 p-4">
-                  <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                    <div>
-                      <p className="font-semibold text-white">{code}</p>
-                      <p className="mt-1 text-sm text-zinc-500">{title}</p>
-                    </div>
-                    <div className="text-left sm:text-right">
-                      <p className="text-sm font-bold text-orange-300">{value}</p>
-                      <p className="mt-1 text-xs text-zinc-500">{status}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+        <div className="mt-5 rounded-2xl border border-white/[0.08] bg-[#0c1119] p-5">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold text-white">Delivery queue</h2>
+              <p className="mt-1 text-sm text-zinc-500">Orders assigned to you by admin.</p>
             </div>
+            {loading ? <span className="text-sm text-zinc-500">Loading...</span> : null}
           </div>
 
-          <aside className="rounded-2xl border border-white/[0.08] bg-[#0c1119] p-5">
-            <h2 className="text-lg font-semibold text-white">Saved partner details</h2>
-            <div className="mt-4 space-y-3 text-sm">
-              <div className="flex justify-between gap-4">
-                <span className="text-zinc-500">Email</span>
-                <span className="text-right font-semibold text-white">{profile?.email}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-zinc-500">Phone</span>
-                <span className="text-right font-semibold text-white">{profile?.phone ?? "Not set"}</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-zinc-500">Verified</span>
-                <span className="text-right font-semibold text-emerald-300">Yes</span>
-              </div>
-              {isRestaurant && (
-                <>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-zinc-500">Address</span>
-                    <span className="text-right font-semibold text-white">{profile?.address ?? "Not set"}</span>
+          <div className="mt-4 space-y-3">
+            {rider?.orders.map((order) => {
+              const next = nextRiderStatus(order.status);
+              return (
+                <article key={order.id} className="rounded-2xl border border-white/[0.08] bg-black/25 p-4">
+                  <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-mono text-xs font-semibold text-orange-300">#{order.id.slice(-8)}</p>
+                        <span className="rounded-full bg-white/[0.06] px-2.5 py-1 text-xs font-semibold text-zinc-300">
+                          {statusLabel(order.status)}
+                        </span>
+                      </div>
+                      <h3 className="mt-2 text-lg font-semibold text-white">{order.restaurant.name}</h3>
+                      <p className="mt-1 text-sm text-zinc-500">{orderItems(order)}</p>
+                      <p className="mt-3 text-sm text-zinc-400">
+                        Pickup: {order.restaurant.address ?? "Restaurant location"} | Dropoff: {order.deliveryAddress}
+                      </p>
+                      <p className="mt-1 text-sm text-zinc-500">
+                        Customer: {order.customer.fullName ?? order.customer.email} {order.customer.phone ? `| ${order.customer.phone}` : ""}
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-2 lg:items-end">
+                      <p className="text-base font-bold text-white">{formatTzs(order.totalTzs)}</p>
+                      {next ? (
+                        <button
+                          type="button"
+                          onClick={() => advanceOrder(order)}
+                          className="min-h-11 rounded-xl bg-orange-500 px-4 text-sm font-bold text-zinc-950 transition hover:bg-orange-400"
+                        >
+                          Mark {statusLabel(next)}
+                        </button>
+                      ) : (
+                        <span className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-200">
+                          Done
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  {profile?.googleMapsUrl ? (
-                    <a
-                      href={profile.googleMapsUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-white text-sm font-bold text-zinc-950 transition hover:bg-zinc-200"
-                    >
-                      Open restaurant on Google Maps
-                    </a>
-                  ) : null}
-                </>
-              )}
-            </div>
-            {isRestaurant && profile?.address ? (
-              <div className="mt-5 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#111827]">
-                <iframe
-                  title="Restaurant location map"
-                  src={`https://www.google.com/maps?q=${encodeURIComponent(
-                    [profile.address, profile.city, "Tanzania"].filter(Boolean).join(", "),
-                  )}&output=embed`}
-                  className="h-56 w-full"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
+                </article>
+              );
+            })}
+
+            {!loading && !rider?.orders.length ? (
+              <div className="rounded-2xl border border-dashed border-white/[0.12] p-8 text-center">
+                <p className="text-lg font-semibold text-white">No assigned deliveries</p>
+                <p className="mt-2 text-sm text-zinc-500">Ukiwa online, admin anaweza kukupa order hapa.</p>
               </div>
             ) : null}
-            <p className="mt-5 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">
-              Details hizi zitaendelea kubaki hata ukisignout.
-            </p>
-          </aside>
+          </div>
         </div>
       </div>
     </section>

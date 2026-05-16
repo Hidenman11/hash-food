@@ -15,6 +15,17 @@ export type AuthResponse = {
   token: string;
 };
 
+export type OrderStatus =
+  | "PENDING_PAYMENT"
+  | "PAID"
+  | "CONFIRMED"
+  | "PREPARING"
+  | "READY_FOR_PICKUP"
+  | "PICKED_UP"
+  | "EN_ROUTE"
+  | "DELIVERED"
+  | "CANCELLED";
+
 // Admin API Types
 export type AdminStats = {
   overview: {
@@ -39,6 +50,8 @@ export type AdminStats = {
     customer: {
       name: string;
       phone: string;
+      lat: number | null;
+      lng: number | null;
     };
     restaurant: {
       name: string;
@@ -71,7 +84,7 @@ export type AdminOrder = {
   customerId: string;
   restaurantId: string;
   riderId: string | null;
-  status: string;
+  status: OrderStatus;
   totalTzs: number;
   subtotalTzs: number;
   deliveryFeeTzs: number;
@@ -207,9 +220,79 @@ export type OrderCreateRequest = {
 
 export type OrderResponse = {
   id: string;
-  status: string;
+  status: OrderStatus;
   totalTzs: number;
   [key: string]: unknown;
+};
+
+export type OrderDetails = {
+  id: string;
+  customerId: string;
+  restaurantId: string;
+  riderId: string | null;
+  status: OrderStatus;
+  totalTzs: number;
+  subtotalTzs: number;
+  deliveryFeeTzs: number;
+  deliveryAddress: string;
+  deliveryLat: number | null;
+  deliveryLng: number | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  restaurant: {
+    id: string;
+    name: string;
+    slug: string;
+    address: string | null;
+    lat: number | null;
+    lng: number | null;
+  };
+  customer?: {
+    fullName: string | null;
+    phone: string | null;
+    email: string;
+  };
+  rider: {
+    id: string;
+    currentLat: number | null;
+    currentLng: number | null;
+    heading: number | null;
+    user: {
+      fullName: string | null;
+      phone: string | null;
+    };
+  } | null;
+  items: Array<{
+    quantity: number;
+    unitPriceTzs: number;
+    menuItem: {
+      name: string;
+    };
+  }>;
+};
+
+export type RiderProfile = {
+  id: string;
+  userId: string;
+  vehicleType: string | null;
+  isOnline: boolean;
+  currentLat: number | null;
+  currentLng: number | null;
+  heading: number | null;
+  lastSeenAt: string | null;
+  user: {
+    email: string;
+    fullName: string | null;
+    phone: string | null;
+  };
+  orders: Array<OrderDetails & {
+    customer: {
+      fullName: string | null;
+      phone: string | null;
+      email: string;
+    };
+  }>;
 };
 
 function getAuthHeaders() {
@@ -266,6 +349,61 @@ export async function getMyOrders(): Promise<{ data: unknown[] }> {
   const url = `${API_BASE_URL}/v1/orders/mine`;
   return await fetchJson<{ data: unknown[] }>(url, {
     headers: getAuthHeaders(),
+  });
+}
+
+export async function getOrder(id: string): Promise<{ data: OrderDetails }> {
+  return await fetchJson<{ data: OrderDetails }>(
+    `${API_BASE_URL}/v1/orders/${encodeURIComponent(id)}`,
+    { headers: getAuthHeaders() },
+  );
+}
+
+export async function updateOrderStatus(
+  id: string,
+  status: OrderStatus,
+): Promise<{ data: OrderResponse }> {
+  return await fetchJson<{ data: OrderResponse }>(
+    `${API_BASE_URL}/v1/orders/${encodeURIComponent(id)}/status`,
+    {
+      method: "PATCH",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ status }),
+    },
+  );
+}
+
+export async function assignOrderRider(
+  orderId: string,
+  riderId: string,
+): Promise<{ data: OrderResponse }> {
+  return await fetchJson<{ data: OrderResponse }>(
+    `${API_BASE_URL}/v1/orders/${encodeURIComponent(orderId)}/assign-rider`,
+    {
+      method: "PATCH",
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ riderId }),
+    },
+  );
+}
+
+export async function getRiderMe(): Promise<{ data: RiderProfile }> {
+  return await fetchJson<{ data: RiderProfile }>(`${API_BASE_URL}/v1/riders/me`, {
+    headers: getAuthHeaders(),
+  });
+}
+
+export async function updateRiderMe(payload: {
+  isOnline?: boolean;
+  vehicleType?: string;
+  currentLat?: number;
+  currentLng?: number;
+  heading?: number;
+}): Promise<{ data: RiderProfile }> {
+  return await fetchJson<{ data: RiderProfile }>(`${API_BASE_URL}/v1/riders/me`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
   });
 }
 

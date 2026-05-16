@@ -77,7 +77,9 @@ export function createAdminRouter() {
             id: order.id,
             customer: {
               name: order.customer.fullName,
-              phone: order.customer.phone
+              phone: order.customer.phone,
+              lat: order.deliveryLat,
+              lng: order.deliveryLng
             },
             restaurant: {
               name: order.restaurant.name,

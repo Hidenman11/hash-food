@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 import { config } from "./config.js";
 import { configureApp, createBaseApp } from "./createApp.js";
 import { connectWithRetry } from "./lib/connectDb.js";
+import { registerTrackingSocket } from "./socket/tracking.js";
 
 const app = createBaseApp();
 const httpServer = createServer(app);
@@ -14,6 +15,7 @@ const io = new Server(httpServer, {
 });
 
 configureApp(app, io);
+registerTrackingSocket(io);
 
 const port = config.port;
 

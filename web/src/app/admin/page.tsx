@@ -303,6 +303,8 @@ export default function AdminDashboardPage() {
               <DeliveryMap
                 deliveries={stats.activeDeliveries
                   .filter((delivery) => (
+                    delivery.customer.lat !== null &&
+                    delivery.customer.lng !== null &&
                     delivery.restaurant.lat !== null &&
                     delivery.restaurant.lng !== null &&
                     delivery.rider?.lat !== null &&
@@ -312,8 +314,8 @@ export default function AdminDashboardPage() {
                     id: delivery.id,
                     customer: {
                       name: delivery.customer.name,
-                      lat: delivery.restaurant.lat ?? -2.5164,
-                      lng: delivery.restaurant.lng ?? 32.9175,
+                      lat: delivery.customer.lat ?? -2.5164,
+                      lng: delivery.customer.lng ?? 32.9175,
                     },
                     restaurant: {
                       name: delivery.restaurant.name,

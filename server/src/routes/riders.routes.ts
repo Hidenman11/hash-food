@@ -10,7 +10,22 @@ export function createRidersRouter(io: SocketIOServer) {
   router.get("/me", requireAuth, requireRole("RIDER"), async (req, res) => {
     const rider = await prisma.rider.findUnique({
       where: { userId: req.user!.id },
-      include: { user: { select: { email: true, fullName: true, phone: true } } },
+      include: {
+        user: { select: { email: true, fullName: true, phone: true } },
+        orders: {
+          where: {
+            status: {
+              in: ["CONFIRMED", "PREPARING", "READY_FOR_PICKUP", "PICKED_UP", "EN_ROUTE"],
+            },
+          },
+          orderBy: { updatedAt: "desc" },
+          include: {
+            customer: { select: { fullName: true, phone: true, email: true } },
+            restaurant: { select: { name: true, address: true, lat: true, lng: true } },
+            items: { include: { menuItem: { select: { name: true } } } },
+          },
+        },
+      },
     });
     if (!rider) {
       res.status(404).json({ error: "Rider profile not found" });

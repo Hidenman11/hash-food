@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Logo } from "@/components/brand/Logo";
+import type { AuthUser } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 const nav = [
@@ -20,35 +21,35 @@ const nav = [
 ] as const;
 
 function NavIcon({ name }: { name: (typeof nav)[number]["icon"] }) {
-  const c = "h-5 w-5";
+  const className = "h-5 w-5";
   switch (name) {
     case "grid":
       return (
-        <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
           <path strokeWidth="1.5" d="M4 4h7v7H4V4zM13 4h7v7h-7V4zM4 13h7v7H4v-7zM13 13h7v7h-7v-7z" />
         </svg>
       );
     case "activity":
       return (
-        <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
-          <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+          <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M4 19V9m6 10V5m6 14v-7m4 7H3" />
         </svg>
       );
     case "orders":
       return (
-        <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
           <path strokeWidth="1.5" strokeLinejoin="round" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
         </svg>
       );
     case "store":
       return (
-        <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
           <path strokeWidth="1.5" strokeLinejoin="round" d="M4 10h16M6 10v10h12V10M9 10V7h6v3M8 21h8" />
         </svg>
       );
     case "bike":
       return (
-        <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
           <circle cx="7" cy="17" r="3" strokeWidth="1.5" />
           <circle cx="17" cy="17" r="3" strokeWidth="1.5" />
           <path strokeWidth="1.5" strokeLinejoin="round" d="M5 17H3l3-8h4l2 4h6l3 4h-2" />
@@ -56,7 +57,7 @@ function NavIcon({ name }: { name: (typeof nav)[number]["icon"] }) {
       );
     case "users":
       return (
-        <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
           <circle cx="9" cy="8" r="3" strokeWidth="1.5" />
           <path strokeWidth="1.5" d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
           <circle cx="17" cy="9" r="2.5" strokeWidth="1.5" />
@@ -65,26 +66,26 @@ function NavIcon({ name }: { name: (typeof nav)[number]["icon"] }) {
       );
     case "chart":
       return (
-        <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
           <path strokeWidth="1.5" strokeLinecap="round" d="M4 19h16M7 16l3-5 3 2 4-6 3 4" />
         </svg>
       );
     case "doc":
       return (
-        <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
           <path strokeWidth="1.5" strokeLinejoin="round" d="M9 3h6l4 4v14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
           <path strokeWidth="1.5" d="M9 9h6M9 13h6M9 17h4" />
         </svg>
       );
     case "logs":
       return (
-        <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
-          <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+          <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M5 5h14M5 9h14M5 13h8M5 17h10" />
         </svg>
       );
     default:
       return (
-        <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
           <circle cx="12" cy="12" r="3" strokeWidth="1.5" />
           <path strokeWidth="1.5" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
         </svg>
@@ -95,6 +96,39 @@ function NavIcon({ name }: { name: (typeof nav)[number]["icon"] }) {
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [checkedAuth, setCheckedAuth] = useState(false);
+
+  useEffect(() => {
+    function readUser() {
+      try {
+        const saved = localStorage.getItem("hashfood_user");
+        setAuthUser(saved ? (JSON.parse(saved) as AuthUser) : null);
+      } catch {
+        setAuthUser(null);
+      } finally {
+        setCheckedAuth(true);
+      }
+    }
+
+    const timer = window.setTimeout(readUser, 0);
+    window.addEventListener("storage", readUser);
+    window.addEventListener("hashfood-auth-updated", readUser);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("storage", readUser);
+      window.removeEventListener("hashfood-auth-updated", readUser);
+    };
+  }, []);
+
+  function signOut() {
+    localStorage.removeItem("hashfood_token");
+    localStorage.removeItem("hashfood_user");
+    setAuthUser(null);
+    window.dispatchEvent(new Event("hashfood-auth-updated"));
+  }
+
+  const adminAllowed = authUser?.role === "ADMIN";
 
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-100">
@@ -109,10 +143,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-3" aria-label="Admin">
           {nav.map((item) => {
-            const active =
-              item.href === "/admin"
-                ? pathname === "/admin"
-                : pathname.startsWith(item.href);
+            const active = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
@@ -133,12 +164,21 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <div className="shrink-0 border-t border-white/[0.06] p-4">
+        <div className="shrink-0 space-y-3 border-t border-white/[0.06] p-4">
+          {authUser ? (
+            <button
+              type="button"
+              onClick={signOut}
+              className="flex w-full items-center justify-center rounded-xl border border-white/[0.08] py-2.5 text-sm font-medium text-zinc-400 transition hover:border-red-500/30 hover:text-red-200"
+            >
+              Sign out
+            </button>
+          ) : null}
           <Link
             href="/"
             className="flex items-center justify-center rounded-xl border border-white/[0.08] py-2.5 text-sm font-medium text-zinc-400 transition hover:border-orange-500/30 hover:text-white"
           >
-            ← Back to site
+            Back to site
           </Link>
         </div>
       </aside>
@@ -166,22 +206,37 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               </svg>
             </button>
             <div>
-              <p className="text-xs font-medium uppercase tracking-widest text-zinc-500">
-                Operations
-              </p>
+              <p className="text-xs font-medium uppercase tracking-widest text-zinc-500">Operations</p>
               <h1 className="text-lg font-semibold text-white">Admin console</h1>
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="hidden rounded-full border border-white/[0.08] bg-[#111] px-4 py-2 text-sm text-zinc-500 sm:block">
-              Mwanza · Live
+              Mwanza | Live
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-orange-600 text-sm font-bold text-white">
               AD
             </div>
           </div>
         </header>
-        <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+        <div className="p-4 sm:p-6 lg:p-8">
+          {!checkedAuth ? (
+            <p className="text-zinc-400">Checking admin session...</p>
+          ) : adminAllowed ? (
+            children
+          ) : (
+            <div className="mx-auto max-w-xl rounded-2xl border border-red-500/25 bg-red-500/10 p-6 text-red-100">
+              <h2 className="text-lg font-semibold text-white">Admin access required</h2>
+              <p className="mt-2 text-sm">Login with an admin account to access operations data.</p>
+              <Link
+                href="/login"
+                className="mt-5 inline-flex min-h-11 items-center rounded-xl bg-orange-500 px-5 text-sm font-bold text-zinc-950"
+              >
+                Login
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
