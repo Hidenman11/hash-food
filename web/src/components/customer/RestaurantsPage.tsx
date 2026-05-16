@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/cn";
@@ -9,13 +8,41 @@ import { getRestaurants, type RestaurantSummary } from "@/lib/api";
 
 const filters = ["All", "Pizza", "Chicken", "Rice", "Burger", "Healthy", "Dessert"] as const;
 
-export function RestaurantsPage() {
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<(typeof filters)[number]>("All");
+type RestaurantsPageProps = {
+  initialQuery?: string;
+  initialCategory?: string;
+};
+
+function matchCategoryFilter(name: string, description: string | null | undefined, filter: string) {
+  const haystack = `${name} ${description ?? ""}`.toLowerCase();
+  return haystack.includes(filter.toLowerCase());
+}
+
+function RestaurantSkeleton() {
+  return (
+    <article className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c1119]">
+      <div className="aspect-[5/3] animate-pulse bg-white/[0.04]" />
+      <div className="space-y-3 p-5">
+        <div className="h-6 w-2/3 animate-pulse rounded-lg bg-white/[0.06]" />
+        <div className="h-4 w-full animate-pulse rounded-lg bg-white/[0.04]" />
+        <div className="h-10 animate-pulse rounded-xl bg-white/[0.04]" />
+      </div>
+    </article>
+  );
+}
+
+export function RestaurantsPage({ initialQuery = "", initialCategory }: RestaurantsPageProps) {
+  const initialFilter = filters.find(
+    (item) => item.toLowerCase() === initialCategory?.toLowerCase(),
+  ) ?? "All";
+
+  const [query, setQuery] = useState(initialQuery);
+  const [filter, setFilter] = useState<(typeof filters)[number]>(initialFilter);
   const [restaurants, setRestaurants] = useState<RestaurantSummary[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [city, setCity] = useState("Mwanza");
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -39,16 +66,16 @@ export function RestaurantsPage() {
     return () => {
       active = false;
     };
-  }, [city, query]);
+  }, [city, query, retryKey]);
 
   const visibleRestaurants = useMemo(() => {
-    return restaurants.filter((restaurant) => {
-      const haystack = `${restaurant.name} ${restaurant.description ?? ""}`.toLowerCase();
-      const matchesQuery = haystack.includes(query.toLowerCase());
-      const matchesFilter = filter === "All" || haystack.includes(filter.toLowerCase());
-      return matchesQuery && matchesFilter;
-    });
-  }, [filter, query, restaurants]);
+    if (filter === "All") return restaurants;
+    return restaurants.filter((restaurant) =>
+      matchCategoryFilter(restaurant.name, restaurant.description, filter),
+    );
+  }, [filter, restaurants]);
+
+  const showEmpty = !loading && !error && visibleRestaurants.length === 0;
 
   return (
     <section className="min-h-screen bg-[#07090d]">
@@ -117,59 +144,73 @@ export function RestaurantsPage() {
           </div>
         </div>
 
-        {loading ? (
-          <div className="mt-5 rounded-2xl border border-white/[0.08] bg-[#0c1119] p-8 text-center text-white">
-            Loading restaurants...
-          </div>
-        ) : error ? (
+        {error ? (
           <div className="mt-5 rounded-2xl border border-red-500/30 bg-red-500/10 p-8 text-center text-red-100">
-            {error}
+            <p>{error}</p>
+            <button
+              type="button"
+              onClick={() => setRetryKey((key) => key + 1)}
+              className="mt-4 rounded-xl bg-red-500/20 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-500/30"
+            >
+              Try again
+            </button>
+          </div>
+        ) : loading ? (
+          <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <RestaurantSkeleton key={index} />
+            ))}
+          </div>
+        ) : showEmpty ? (
+          <div className="mt-5 rounded-2xl border border-white/[0.08] bg-[#0c1119] p-8 text-center">
+            <p className="text-lg font-semibold text-white">No restaurants found</p>
+            <p className="mt-2 text-sm text-zinc-500">
+              {restaurants.length
+                ? "Try a different cuisine filter or clear your search."
+                : "No restaurants are available in this city yet. Try another city or check back soon."}
+            </p>
           </div>
         ) : (
           <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {visibleRestaurants.length ? (
-              visibleRestaurants.map((restaurant) => (
-                <article key={restaurant.id} className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c1119]">
-                  <div className="relative aspect-[5/3] bg-[#111]">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent" />
-                    <div className="absolute inset-x-0 top-0 p-3">
-                      <span className="rounded-full bg-black/65 px-3 py-1 text-xs font-bold text-amber-300">
-                        {restaurant.menuCount} items
-                      </span>
+            {visibleRestaurants.map((restaurant) => (
+              <article key={restaurant.id} className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c1119]">
+                <div className="relative aspect-[5/3] bg-[#111]">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent" />
+                  <div className="absolute inset-x-0 top-0 p-3">
+                    <span className="rounded-full bg-black/65 px-3 py-1 text-xs font-bold text-amber-300">
+                      {restaurant.menuCount} items
+                    </span>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h2 className="text-xl font-semibold text-white">{restaurant.name}</h2>
+                      <p className="mt-1 text-sm text-zinc-500">{restaurant.description ?? "Fast, local dining"}</p>
+                    </div>
+                    <span className="rounded-xl bg-white/[0.06] px-3 py-2 text-xs font-semibold text-zinc-300">
+                      {restaurant.city}
+                    </span>
+                  </div>
+                  <div className="mt-5 grid gap-2 text-sm text-zinc-400">
+                    <div className="flex items-center justify-between">
+                      <span>Delivery fee</span>
+                      <span className="font-semibold text-orange-300">{formatTzs(restaurant.deliveryFeeTzs)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Menu items</span>
+                      <span>{restaurant.menuCount}</span>
                     </div>
                   </div>
-                  <div className="p-5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h2 className="text-xl font-semibold text-white">{restaurant.name}</h2>
-                        <p className="mt-1 text-sm text-zinc-500">{restaurant.description ?? "Fast, local dining"}</p>
-                      </div>
-                      <span className="rounded-xl bg-white/[0.06] px-3 py-2 text-xs font-semibold text-zinc-300">{restaurant.city}</span>
-                    </div>
-                    <div className="mt-5 grid gap-2 text-sm text-zinc-400">
-                      <div className="flex items-center justify-between">
-                        <span>Delivery fee</span>
-                        <span className="font-semibold text-orange-300">{formatTzs(restaurant.deliveryFeeTzs)}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>Menu items</span>
-                        <span>{restaurant.menuCount}</span>
-                      </div>
-                    </div>
-                    <Link
-                      href={`/restaurants/${restaurant.slug}`}
-                      className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-orange-500 text-sm font-bold text-zinc-950 transition hover:bg-orange-400"
-                    >
-                      Open menu
-                    </Link>
-                  </div>
-                </article>
-              ))
-            ) : (
-              <div className="rounded-2xl border border-white/[0.08] bg-[#0c1119] p-8 text-center text-white">
-                No restaurants found for your search. Try another cuisine or city.
-              </div>
-            )}
+                  <Link
+                    href={`/restaurants/${restaurant.slug}`}
+                    className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-orange-500 text-sm font-bold text-zinc-950 transition hover:bg-orange-400"
+                  >
+                    Open menu
+                  </Link>
+                </div>
+              </article>
+            ))}
           </div>
         )}
       </div>

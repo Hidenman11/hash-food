@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.routes.js";
 import mapsRoutes from "./routes/maps.routes.js";
 import { createOrdersRouter } from "./routes/orders.routes.js";
 import { createPaymentsRouter } from "./routes/payments.routes.js";
+import healthRoutes from "./routes/health.routes.js";
 import restaurantsRoutes from "./routes/restaurants.routes.js";
 import { createRidersRouter } from "./routes/riders.routes.js";
 
@@ -24,6 +25,7 @@ export function configureApp(app: Application, io: SocketIOServer) {
   app.get("/health", (_req, res) => {
     res.json({ ok: true, service: "hash-food-api" });
   });
+  app.use("/api", healthRoutes);
 
   app.use("/v1/auth", authRoutes);
   app.use("/v1/admin", createAdminRouter());

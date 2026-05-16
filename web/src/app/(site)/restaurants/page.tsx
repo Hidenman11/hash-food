@@ -6,6 +6,14 @@ export const metadata: Metadata = {
   description: "Browse restaurants near you on HASH FOOD.",
 };
 
-export default function Page() {
-  return <RestaurantsPage />;
+type PageProps = {
+  searchParams: Promise<{ q?: string; category?: string }>;
+};
+
+export default async function Page({ searchParams }: PageProps) {
+  const params = await searchParams;
+
+  return (
+    <RestaurantsPage initialQuery={params.q ?? ""} initialCategory={params.category} />
+  );
 }

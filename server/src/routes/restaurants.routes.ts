@@ -17,12 +17,12 @@ router.get("/", async (req, res) => {
   }
   const where = {
     isActive: true,
-    ...(q.data.city ? { city: { equals: q.data.city, mode: "insensitive" as const } } : {}),
+    ...(q.data.city ? { city: q.data.city } : {}),
     ...(q.data.q
       ? {
           OR: [
-            { name: { contains: q.data.q, mode: "insensitive" as const } },
-            { description: { contains: q.data.q, mode: "insensitive" as const } },
+            { name: { contains: q.data.q } },
+            { description: { contains: q.data.q } },
           ],
         }
       : {}),
@@ -57,12 +57,21 @@ router.get("/:idOrSlug", async (req, res) => {
       OR: [{ id: idOrSlug }, { slug: idOrSlug }],
       isActive: true,
     },
+    include: {
+      _count: { select: { menu: true } },
+    },
   });
   if (!restaurant) {
     res.status(404).json({ error: "Restaurant not found" });
     return;
   }
-  res.json({ data: restaurant });
+  const { _count, ...rest } = restaurant;
+  res.json({
+    data: {
+      ...rest,
+      menuCount: _count.menu,
+    },
+  });
 });
 
 router.get("/:idOrSlug/menu", async (req, res) => {
