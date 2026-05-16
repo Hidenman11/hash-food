@@ -1,4 +1,4 @@
-import { sampleRestaurants } from "@/lib/sample-restaurants";
+import { getSampleMenu, sampleRestaurants } from "@/lib/sample-restaurants";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "";
@@ -310,6 +310,102 @@ function getAuthHeaders() {
   return headers;
 }
 
+const customerOrdersKey = "hashfood_customer_orders";
+
+function readLocalOrders(): OrderDetails[] {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const saved = localStorage.getItem(customerOrdersKey);
+    const parsed = saved ? (JSON.parse(saved) as OrderDetails[]) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalOrders(orders: OrderDetails[]) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(customerOrdersKey, JSON.stringify(orders));
+}
+
+function localOrderSummary(order: OrderDetails) {
+  return {
+    id: order.id,
+    status: order.status,
+    totalTzs: order.totalTzs,
+    restaurant: {
+      name: order.restaurant.name,
+    },
+    rider: order.rider
+      ? {
+          currentLat: order.rider.currentLat,
+          currentLng: order.rider.currentLng,
+        }
+      : null,
+  };
+}
+
+function buildLocalOrder(payload: OrderCreateRequest): OrderDetails {
+  const restaurant =
+    sampleRestaurants.find((item) => item.id === payload.restaurantId) ?? sampleRestaurants[0];
+  const menu = getSampleMenu(restaurant.slug);
+  const items = payload.items.map((item) => {
+    const menuItem = menu.find((candidate) => candidate.id === item.menuItemId);
+    return {
+      quantity: item.quantity,
+      unitPriceTzs: menuItem?.priceTzs ?? 10000,
+      menuItem: {
+        name: menuItem?.name ?? "HASH FOOD item",
+      },
+    };
+  });
+  const subtotalTzs = items.reduce((sum, item) => sum + item.quantity * item.unitPriceTzs, 0);
+  const deliveryFeeTzs = restaurant.deliveryFeeTzs || 3000;
+  const now = new Date().toISOString();
+
+  return {
+    id: `HF-${Date.now().toString().slice(-8)}`,
+    customerId: "local-customer",
+    restaurantId: restaurant.id,
+    riderId: "local-rider",
+    status: "EN_ROUTE",
+    totalTzs: subtotalTzs + deliveryFeeTzs,
+    subtotalTzs,
+    deliveryFeeTzs,
+    deliveryAddress: payload.deliveryAddress,
+    deliveryLat: payload.deliveryLat ?? null,
+    deliveryLng: payload.deliveryLng ?? null,
+    notes: payload.notes ?? null,
+    createdAt: now,
+    updatedAt: now,
+    restaurant: {
+      id: restaurant.id,
+      name: restaurant.name,
+      slug: restaurant.slug,
+      address: restaurant.address,
+      lat: restaurant.lat,
+      lng: restaurant.lng,
+    },
+    customer: {
+      fullName: "HASH FOOD Customer",
+      phone: "255700000000",
+      email: "customer@hashfood.local",
+    },
+    rider: {
+      id: "local-rider",
+      currentLat: restaurant.lat,
+      currentLng: restaurant.lng,
+      heading: 84,
+      user: {
+        fullName: "Juma Rider",
+        phone: "255755111222",
+      },
+    },
+    items,
+  };
+}
+
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, options);
   const json = await response.json().catch(() => null);
@@ -345,26 +441,58 @@ export async function getRestaurantMenu(slug: string): Promise<MenuItem[]> {
 }
 
 export async function createOrder(payload: OrderCreateRequest): Promise<{ data: OrderResponse }> {
+  if (!API_BASE_URL) {
+    const order = buildLocalOrder(payload);
+    saveLocalOrders([order, ...readLocalOrders()]);
+    return { data: { id: order.id, status: order.status, totalTzs: order.totalTzs } };
+  }
+
   const url = `${API_BASE_URL}/v1/orders`;
-  return await fetchJson<{ data: OrderResponse }>(url, {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(payload),
-  });
+  try {
+    return await fetchJson<{ data: OrderResponse }>(url, {
+      method: "POST",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    const order = buildLocalOrder(payload);
+    saveLocalOrders([order, ...readLocalOrders()]);
+    return { data: { id: order.id, status: order.status, totalTzs: order.totalTzs } };
+  }
 }
 
 export async function getMyOrders(): Promise<{ data: unknown[] }> {
+  if (!API_BASE_URL) {
+    return { data: readLocalOrders().map(localOrderSummary) };
+  }
+
   const url = `${API_BASE_URL}/v1/orders/mine`;
-  return await fetchJson<{ data: unknown[] }>(url, {
-    headers: getAuthHeaders(),
-  });
+  try {
+    return await fetchJson<{ data: unknown[] }>(url, {
+      headers: getAuthHeaders(),
+    });
+  } catch {
+    return { data: readLocalOrders().map(localOrderSummary) };
+  }
 }
 
 export async function getOrder(id: string): Promise<{ data: OrderDetails }> {
-  return await fetchJson<{ data: OrderDetails }>(
-    `${API_BASE_URL}/v1/orders/${encodeURIComponent(id)}`,
-    { headers: getAuthHeaders() },
-  );
+  if (!API_BASE_URL) {
+    const localOrder = readLocalOrders().find((order) => order.id === id);
+    if (localOrder) return { data: localOrder };
+    throw new Error("Order haijapatikana.");
+  }
+
+  try {
+    return await fetchJson<{ data: OrderDetails }>(
+      `${API_BASE_URL}/v1/orders/${encodeURIComponent(id)}`,
+      { headers: getAuthHeaders() },
+    );
+  } catch {
+    const localOrder = readLocalOrders().find((order) => order.id === id);
+    if (localOrder) return { data: localOrder };
+    throw new Error("Order haijapatikana.");
+  }
 }
 
 export async function updateOrderStatus(

@@ -24,6 +24,16 @@ const starterCart: CartItem[] = [];
 
 const paymentMethods = ["M-Pesa", "Airtel Money", "Tigo Pesa", "Cash"] as const;
 
+const restaurantDefaults: Record<string, { restaurantId: string; menuItemId: string }> = {
+  "Pizza Time": { restaurantId: "rest_pizza_time", menuItemId: "pizza_pepperoni" },
+  "Burger House": { restaurantId: "rest_burger_house", menuItemId: "burger_classic" },
+  "Mama's Kitchen": { restaurantId: "rest_spice_route", menuItemId: "spice_pilau" },
+  "Spice Route": { restaurantId: "rest_spice_route", menuItemId: "spice_pilau" },
+  "Chipsi Point": { restaurantId: "rest_chipsi_point", menuItemId: "chipsi_mayai" },
+  "Fresh Bowl": { restaurantId: "rest_fresh_bowl", menuItemId: "fresh_green" },
+  "Sweet Corner": { restaurantId: "rest_sweet_corner", menuItemId: "sweet_cake" },
+};
+
 function saveCart(items: CartItem[]) {
   localStorage.setItem(cartStorageKey, JSON.stringify(items));
   window.dispatchEvent(new Event("hashfood-cart-updated"));
@@ -34,10 +44,21 @@ function readCart() {
     const saved = localStorage.getItem(cartStorageKey);
     if (!saved) return starterCart;
     const parsed = JSON.parse(saved) as CartItem[];
-    return Array.isArray(parsed) ? parsed : starterCart;
+    return Array.isArray(parsed) ? parsed.map(normalizeCartItem) : starterCart;
   } catch {
     return starterCart;
   }
+}
+
+function normalizeCartItem(item: CartItem): CartItem {
+  const defaults = restaurantDefaults[item.restaurant] ?? restaurantDefaults["Pizza Time"];
+  return {
+    ...item,
+    menuItemId: item.menuItemId || defaults.menuItemId || item.id,
+    restaurantId: item.restaurantId || defaults.restaurantId,
+    image: item.image || "/images/placeholder.png",
+    quantity: Number(item.quantity) || 1,
+  };
 }
 
 export function CartPage() {
@@ -102,8 +123,9 @@ export function CartPage() {
       return;
     }
 
-    const restaurantId = cart[0].restaurantId;
-    if (cart.some((item) => item.restaurantId !== restaurantId)) {
+    const normalizedCart = cart.map(normalizeCartItem);
+    const restaurantId = normalizedCart[0].restaurantId;
+    if (normalizedCart.some((item) => item.restaurantId !== restaurantId)) {
       setStatus("error");
       setCheckoutMessage("Please place items from one restaurant at a time.");
       return;
@@ -117,7 +139,7 @@ export function CartPage() {
         restaurantId,
         deliveryAddress: deliveryAddress.trim(),
         notes: note.trim() || undefined,
-        items: cart.map((item) => ({ menuItemId: item.menuItemId, quantity: item.quantity })),
+        items: normalizedCart.map((item) => ({ menuItemId: item.menuItemId, quantity: item.quantity })),
       });
 
       setPlaced(true);

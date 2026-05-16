@@ -8,7 +8,7 @@ import { SafeImage } from "@/components/ui/SafeImage";
 
 const offerCartItems: Record<
   string,
-  { name: string; price: number; restaurant: string; image: string }
+  { name: string; price: number; restaurant: string; image: string; menuItemId: string; restaurantId: string }
 > = {
   hashfirst: {
     name: "Chicken pizza offer",
@@ -16,6 +16,8 @@ const offerCartItems: Record<
     restaurant: "Pizza Time",
     image:
       "/images/pizza.jpg",
+    menuItemId: "pizza_pepperoni",
+    restaurantId: "rest_pizza_time",
   },
   freebike: {
     name: "Chips mayai delivery offer",
@@ -23,6 +25,8 @@ const offerCartItems: Record<
     restaurant: "Chipsi Point",
     image:
       "/images/chicken.jpg",
+    menuItemId: "chipsi_mayai",
+    restaurantId: "rest_chipsi_point",
   },
   lunch20: {
     name: "Beef pilau lunch combo",
@@ -30,6 +34,8 @@ const offerCartItems: Record<
     restaurant: "Mama's Kitchen",
     image:
       "/images/rice.jpg",
+    menuItemId: "spice_pilau",
+    restaurantId: "rest_spice_route",
   },
   sweet2: {
     name: "Dessert combo offer",
@@ -37,6 +43,8 @@ const offerCartItems: Record<
     restaurant: "Sweet Corner",
     image:
       "/images/dessert.jpg",
+    menuItemId: "sweet_cake",
+    restaurantId: "rest_sweet_corner",
   },
 };
 

@@ -7,6 +7,8 @@ import { SafeImage } from "@/components/ui/SafeImage";
 
 type FeaturedOffer = {
   id: string;
+  menuItemId: string;
+  restaurantId: string;
   name: string;
   restaurant: string;
   price: number;
@@ -19,6 +21,8 @@ type FeaturedOffer = {
 const featuredOffers: FeaturedOffer[] = [
   {
     id: "truffle-chicken-burger",
+    menuItemId: "burger_chicken",
+    restaurantId: "rest_burger_house",
     name: "Truffle chicken burger",
     restaurant: "Burger House",
     price: 7000,
@@ -30,6 +34,8 @@ const featuredOffers: FeaturedOffer[] = [
   },
   {
     id: "chicken-pizza-offer",
+    menuItemId: "pizza_pepperoni",
+    restaurantId: "rest_pizza_time",
     name: "Chicken pizza",
     restaurant: "Pizza Time",
     price: 12000,
@@ -41,6 +47,8 @@ const featuredOffers: FeaturedOffer[] = [
   },
   {
     id: "beef-pilau-combo",
+    menuItemId: "spice_pilau",
+    restaurantId: "rest_spice_route",
     name: "Beef pilau combo",
     restaurant: "Mama's Kitchen",
     price: 9500,
@@ -80,6 +88,8 @@ export function FeaturedOfferCard() {
           ...cart,
           {
             id: selected.id,
+            menuItemId: selected.menuItemId,
+            restaurantId: selected.restaurantId,
             name: selected.name,
             restaurant: selected.restaurant,
             price: selected.price,

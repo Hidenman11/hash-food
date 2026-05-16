@@ -6,6 +6,8 @@ import { SafeImage } from "@/components/ui/SafeImage";
 
 type FoodItem = {
   id: string;
+  menuItemId: string;
+  restaurantId: string;
   name: string;
   restaurant: string;
   category: string;
@@ -23,6 +25,8 @@ const categories = ["All", "Pizza", "Chicken", "Burger", "Rice", "Drinks"] as co
 const foods: FoodItem[] = [
   {
     id: "pizza",
+    menuItemId: "pizza_pepperoni",
+    restaurantId: "rest_pizza_time",
     name: "Chicken Pizza",
     restaurant: "Pizza Time",
     category: "Pizza",
@@ -35,6 +39,8 @@ const foods: FoodItem[] = [
   },
   {
     id: "pilau",
+    menuItemId: "spice_pilau",
+    restaurantId: "rest_spice_route",
     name: "Beef Pilau",
     restaurant: "Mama's Kitchen",
     category: "Rice",
@@ -47,6 +53,8 @@ const foods: FoodItem[] = [
   },
   {
     id: "chips",
+    menuItemId: "chipsi_mayai",
+    restaurantId: "rest_chipsi_point",
     name: "Chips Mayai",
     restaurant: "Chipsi Point",
     category: "Chicken",
@@ -59,6 +67,8 @@ const foods: FoodItem[] = [
   },
   {
     id: "burger",
+    menuItemId: "burger_classic",
+    restaurantId: "rest_burger_house",
     name: "Hash Burger",
     restaurant: "Burger House",
     category: "Burger",
@@ -71,6 +81,8 @@ const foods: FoodItem[] = [
   },
   {
     id: "soda",
+    menuItemId: "fresh_juice",
+    restaurantId: "rest_fresh_bowl",
     name: "Cold Soda",
     restaurant: "Pizza Time",
     category: "Drinks",
@@ -172,6 +184,8 @@ export function CustomerDashboard() {
   useEffect(() => {
     const savedCart = cart.map((item) => ({
       id: item.id,
+      menuItemId: item.menuItemId,
+      restaurantId: item.restaurantId,
       name: item.name,
       restaurant: item.restaurant,
       price: item.price,
