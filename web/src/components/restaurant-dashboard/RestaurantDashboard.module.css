@@ -704,11 +704,16 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.menuImage {
+.menuImageWrap {
+  position: relative;
   width: 100%;
   min-height: 140px;
-  object-fit: cover;
+  overflow: hidden;
   border-radius: 22px;
+}
+
+.menuImage {
+  object-fit: cover;
 }
 
 .menuBody {

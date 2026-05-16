@@ -36,7 +36,7 @@ export function OrderCard({ order, onStatusChange }: OrderCardProps) {
           <p className={styles.orderTime}>Placed {order.placedAt}</p>
         </div>
         <div className={styles.orderActionsRow}>
-          {order.status !== "Delivered" ? (
+          {canAdvance ? (
             <button type="button" className={styles.primaryButton} onClick={() => onStatusChange(order.id, nextStatus)}>
               {nextStatus === "Delivered" ? "Complete" : `Move to ${nextStatus}`}
             </button>

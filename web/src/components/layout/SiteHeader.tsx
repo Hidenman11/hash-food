@@ -263,11 +263,11 @@ export function SiteHeader() {
       <div
         id="mobile-nav"
         className={cn(
-          "fixed inset-x-0 top-[4.75rem] bottom-0 z-40 overflow-y-auto bg-[#08080a]/96 backdrop-blur-3xl transition-all duration-500 ease-in-out lg:hidden",
+          "absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4.75rem)] overflow-y-auto border-t border-white/[0.08] bg-[#08080a]/98 shadow-2xl shadow-black/70 backdrop-blur-3xl transition-all duration-300 ease-out lg:hidden",
           open ? "pointer-events-auto opacity-100 translate-y-0" : "pointer-events-none opacity-0 -translate-y-4",
         )}
       >
-        <nav className="flex flex-col gap-2 px-4 pb-10 pt-4" aria-label="Mobile">
+        <nav className="mx-auto flex max-w-7xl flex-col gap-2 px-4 pb-10 pt-4 sm:px-6 lg:px-8" aria-label="Mobile">
           {navItems.map((item) => (
             <Link
               key={item.href}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { API_BASE_URL, type AuthResponse, type AuthUser } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import {
@@ -74,24 +74,18 @@ function FieldIcon({ name }: { name: "user" | "mail" | "lock" | "phone" }) {
 export function AuthForm({ mode, initialRole = "CUSTOMER", initialEmail = "", initialFullName = "", initialPhone = "" }: AuthFormProps) {
   const router = useRouter();
   const isSignup = mode === "signup";
-  const [fullName, setFullName] = useState(initialFullName || "");
+  const partnerInitial =
+    isSignup && initialEmail && isPartnerRole(initialRole)
+      ? getPartnerProfile(initialEmail)
+      : null;
+  const [fullName, setFullName] = useState(initialFullName || partnerInitial?.displayName || "");
   const [email, setEmail] = useState(initialEmail);
-  const [phone, setPhone] = useState(initialPhone || "");
+  const [phone, setPhone] = useState(initialPhone || partnerInitial?.phone || "");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<Role>(initialRole);
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    if (isSignup && initialEmail && isPartnerRole(role)) {
-      const partnerProfile = getPartnerProfile(initialEmail);
-      if (partnerProfile) {
-        setFullName((value) => value || partnerProfile.displayName || "");
-        setPhone((value) => value || partnerProfile.phone || "");
-      }
-    }
-  }, [initialEmail, isSignup, role]);
 
   const title = isSignup ? "Create your account" : "Welcome back";
   const subtitle = isSignup

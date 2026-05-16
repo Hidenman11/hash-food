@@ -1,3 +1,4 @@
+import Image from "next/image";
 import styles from "./RestaurantDashboard.module.css";
 import type { MenuItem } from "./types";
 
@@ -11,7 +12,9 @@ type MenuItemCardProps = {
 export function MenuItemCard({ item, onToggleAvailable, onEdit, onDelete }: MenuItemCardProps) {
   return (
     <article className={styles.menuCard}>
-      <img className={styles.menuImage} src={item.image} alt={item.name} />
+      <div className={styles.menuImageWrap}>
+        <Image className={styles.menuImage} src={item.image} alt={item.name} fill sizes="150px" />
+      </div>
       <div className={styles.menuBody}>
         <div className={styles.menuHeader}>
           <div>

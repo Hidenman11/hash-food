@@ -1,12 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/cn";
 import { formatTzs } from "./customer-data";
 import { getRestaurants, type RestaurantSummary } from "@/lib/api";
 
 const filters = ["All", "Pizza", "Chicken", "Rice", "Burger", "Healthy", "Dessert"] as const;
+const defaultRestaurantImages: Record<string, string> = {
+  "pizza-time": "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=900&q=85",
+  "burger-house": "https://images.unsplash.com/photo-1553979459-b888fc870885?auto=format&fit=crop&w=900&q=85",
+  "spice-route": "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=900&q=85",
+  "fresh-bowl": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=85",
+};
 
 type RestaurantsPageProps = {
   initialQuery?: string;
@@ -16,6 +23,10 @@ type RestaurantsPageProps = {
 function matchCategoryFilter(name: string, description: string | null | undefined, filter: string) {
   const haystack = `${name} ${description ?? ""}`.toLowerCase();
   return haystack.includes(filter.toLowerCase());
+}
+
+function getRestaurantImage(restaurant: RestaurantSummary) {
+  return defaultRestaurantImages[restaurant.slug] ?? "/images/meal.svg";
 }
 
 function RestaurantSkeleton() {
@@ -46,10 +57,14 @@ export function RestaurantsPage({ initialQuery = "", initialCategory }: Restaura
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
-    setError(null);
 
-    getRestaurants(query, city)
+    Promise.resolve()
+      .then(() => {
+        if (!active) return [];
+        setLoading(true);
+        setError(null);
+        return getRestaurants(query, city);
+      })
       .then((data) => {
         if (!active) return;
         setRestaurants(data);
@@ -175,6 +190,13 @@ export function RestaurantsPage({ initialQuery = "", initialCategory }: Restaura
             {visibleRestaurants.map((restaurant) => (
               <article key={restaurant.id} className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c1119]">
                 <div className="relative aspect-[5/3] bg-[#111]">
+                  <Image
+                    src={getRestaurantImage(restaurant)}
+                    alt={restaurant.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent" />
                   <div className="absolute inset-x-0 top-0 p-3">
                     <span className="rounded-full bg-black/65 px-3 py-1 text-xs font-bold text-amber-300">

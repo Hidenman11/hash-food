@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import styles from "./RestaurantDashboard.module.css";
 
@@ -294,7 +295,9 @@ function MenuSection({ items, onToggle, onDelete, onEdit, onAdd }: { items: Menu
       <div className={styles.menuGrid}>
         {items.map((item) => (
           <div key={item.id} className={styles.menuCard}>
-            <img className={styles.menuImage} src={item.image} alt={item.name} />
+            <div className={styles.menuImageWrap}>
+              <Image className={styles.menuImage} src={item.image} alt={item.name} fill sizes="150px" />
+            </div>
             <div className={styles.menuInfo}>
               {editId === item.id ? (
                 <div className={styles.editRow}>
@@ -535,7 +538,7 @@ export function RestaurantDashboard() {
         name,
         price,
         available: true,
-        image: "/images/meal.jpg",
+        image: "/images/meal.svg",
       },
     ]);
   };

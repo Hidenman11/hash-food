@@ -149,6 +149,13 @@ export type AdminRider = {
   };
 };
 
+export type Pagination = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
 export type RestaurantSummary = {
   id: string;
   name: string;
@@ -189,6 +196,13 @@ export type OrderCreateRequest = {
   items: Array<{ menuItemId: string; quantity: number }>;
 };
 
+export type OrderResponse = {
+  id: string;
+  status: string;
+  totalTzs: number;
+  [key: string]: unknown;
+};
+
 function getAuthHeaders() {
   const token = typeof window === "undefined" ? null : localStorage.getItem("hashfood_token");
   const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -200,7 +214,10 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, options);
   const json = await response.json().catch(() => null);
   if (!response.ok) {
-    const error = json && typeof json === "object" && "error" in json ? (json as any).error : response.statusText;
+    const error =
+      json && typeof json === "object" && "error" in json
+        ? (json as { error?: unknown }).error
+        : response.statusText;
     throw new Error(typeof error === "string" ? error : "Request failed");
   }
   return json as T;
@@ -227,18 +244,18 @@ export async function getRestaurantMenu(slug: string): Promise<MenuItem[]> {
   return json.data;
 }
 
-export async function createOrder(payload: OrderCreateRequest): Promise<any> {
+export async function createOrder(payload: OrderCreateRequest): Promise<{ data: OrderResponse }> {
   const url = `${API_BASE_URL}/v1/orders`;
-  return await fetchJson<{ data: any }>(url, {
+  return await fetchJson<{ data: OrderResponse }>(url, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(payload),
   });
 }
 
-export async function getMyOrders(): Promise<{ data: any[] }> {
+export async function getMyOrders(): Promise<{ data: unknown[] }> {
   const url = `${API_BASE_URL}/v1/orders/mine`;
-  return await fetchJson<{ data: any[] }>(url, {
+  return await fetchJson<{ data: unknown[] }>(url, {
     headers: getAuthHeaders(),
   });
 }
@@ -330,7 +347,7 @@ export async function getAdminOrders(params?: {
   status?: string;
   restaurantId?: string;
   riderId?: string;
-}): Promise<{ data: AdminOrder[]; pagination: any }> {
+}): Promise<{ data: AdminOrder[]; pagination: Pagination }> {
   const token = localStorage.getItem("hashfood_token");
   const searchParams = new URLSearchParams();
 
@@ -357,7 +374,7 @@ export async function getAdminUsers(params?: {
   page?: number;
   limit?: number;
   role?: string;
-}): Promise<{ data: AdminUser[]; pagination: any }> {
+}): Promise<{ data: AdminUser[]; pagination: Pagination }> {
   const token = localStorage.getItem("hashfood_token");
   const searchParams = new URLSearchParams();
 
@@ -382,7 +399,7 @@ export async function getAdminRestaurants(params?: {
   page?: number;
   limit?: number;
   isActive?: boolean;
-}): Promise<{ data: AdminRestaurant[]; pagination: any }> {
+}): Promise<{ data: AdminRestaurant[]; pagination: Pagination }> {
   const token = localStorage.getItem("hashfood_token");
   const searchParams = new URLSearchParams();
 
@@ -407,7 +424,7 @@ export async function getAdminRiders(params?: {
   page?: number;
   limit?: number;
   isActive?: boolean;
-}): Promise<{ data: AdminRider[]; pagination: any }> {
+}): Promise<{ data: AdminRider[]; pagination: Pagination }> {
   const token = localStorage.getItem("hashfood_token");
   const searchParams = new URLSearchParams();
 
