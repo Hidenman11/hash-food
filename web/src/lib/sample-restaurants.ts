@@ -49,7 +49,8 @@ export const sampleRestaurants: SampleRestaurant[] = [
     rating: 4.8,
     deliveryMins: "25-35 min",
     distanceKm: 1.2,
-    image: "/images/pizza.svg",
+    image:
+      "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=1200&q=90",
     tags: ["Pizza", "Pasta", "Popular"],
     isActive: true,
     createdAt: "2026-01-01T00:00:00.000Z",
@@ -70,7 +71,8 @@ export const sampleRestaurants: SampleRestaurant[] = [
     rating: 4.7,
     deliveryMins: "15-25 min",
     distanceKm: 0.8,
-    image: "/images/burger.svg",
+    image:
+      "https://images.unsplash.com/photo-1553979459-b888fc870885?auto=format&fit=crop&w=1200&q=90",
     tags: ["Burger", "Fast", "Fries"],
     isActive: true,
     createdAt: "2026-01-01T00:00:00.000Z",
@@ -91,7 +93,8 @@ export const sampleRestaurants: SampleRestaurant[] = [
     rating: 4.6,
     deliveryMins: "25-35 min",
     distanceKm: 2.1,
-    image: "/images/spice-route.svg",
+    image:
+      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=1200&q=90",
     tags: ["Rice", "Curry", "Local"],
     isActive: true,
     createdAt: "2026-01-01T00:00:00.000Z",
@@ -112,7 +115,8 @@ export const sampleRestaurants: SampleRestaurant[] = [
     rating: 4.5,
     deliveryMins: "18-28 min",
     distanceKm: 1.5,
-    image: "/images/fresh-bowl.svg",
+    image:
+      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=90",
     tags: ["Healthy", "Salads", "Drinks"],
     isActive: true,
     createdAt: "2026-01-01T00:00:00.000Z",
@@ -133,7 +137,8 @@ export const sampleRestaurants: SampleRestaurant[] = [
     rating: 4.4,
     deliveryMins: "12-22 min",
     distanceKm: 0.6,
-    image: "/images/dessert.svg",
+    image:
+      "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=90",
     tags: ["Dessert", "Coffee", "Bakery"],
     isActive: true,
     createdAt: "2026-01-01T00:00:00.000Z",
@@ -154,7 +159,8 @@ export const sampleRestaurants: SampleRestaurant[] = [
     rating: 4.3,
     deliveryMins: "15-25 min",
     distanceKm: 0.9,
-    image: "/images/chicken.svg",
+    image:
+      "https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?auto=format&fit=crop&w=1200&q=90",
     tags: ["Chicken", "Snacks", "Budget"],
     isActive: true,
     createdAt: "2026-01-01T00:00:00.000Z",

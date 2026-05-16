@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import type { AuthUser } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -19,6 +19,8 @@ const nav = [
   { label: "System Logs", href: "/admin/logs", icon: "logs" },
   { label: "Settings", href: "/admin/settings", icon: "gear" },
 ] as const;
+
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "hashfood2026";
 
 function NavIcon({ name }: { name: (typeof nav)[number]["icon"] }) {
   const className = "h-5 w-5";
@@ -98,6 +100,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [checkedAuth, setCheckedAuth] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminLoginError, setAdminLoginError] = useState("");
 
   useEffect(() => {
     function readUser() {
@@ -125,6 +129,32 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("hashfood_token");
     localStorage.removeItem("hashfood_user");
     setAuthUser(null);
+    setAdminPassword("");
+    window.dispatchEvent(new Event("hashfood-auth-updated"));
+  }
+
+  function handleAdminLogin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setAdminLoginError("");
+
+    if (adminPassword !== ADMIN_PASSWORD) {
+      setAdminLoginError("Password si sahihi. Jaribu tena.");
+      return;
+    }
+
+    const adminUser: AuthUser = {
+      id: "local-admin",
+      email: "admin@hashfood.local",
+      phone: null,
+      fullName: "HASH FOOD Admin",
+      role: "ADMIN",
+      createdAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem("hashfood_token", "local-admin-session");
+    localStorage.setItem("hashfood_user", JSON.stringify(adminUser));
+    setAuthUser(adminUser);
+    setAdminPassword("");
     window.dispatchEvent(new Event("hashfood-auth-updated"));
   }
 
@@ -225,15 +255,68 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           ) : adminAllowed ? (
             children
           ) : (
-            <div className="mx-auto max-w-xl rounded-2xl border border-red-500/25 bg-red-500/10 p-6 text-red-100">
-              <h2 className="text-lg font-semibold text-white">Admin access required</h2>
-              <p className="mt-2 text-sm">Login with an admin account to access operations data.</p>
-              <Link
-                href="/login"
-                className="mt-5 inline-flex min-h-11 items-center rounded-xl bg-orange-500 px-5 text-sm font-bold text-zinc-950"
-              >
-                Login
-              </Link>
+            <div className="mx-auto grid max-w-5xl overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c1119] shadow-[0_24px_80px_rgba(0,0,0,0.45)] lg:grid-cols-[0.9fr_1.1fr]">
+              <div className="border-b border-white/[0.08] bg-gradient-to-br from-orange-500 to-amber-500 p-8 text-zinc-950 lg:border-b-0 lg:border-r">
+                <p className="text-xs font-black uppercase tracking-[0.24em]">Admin Console</p>
+                <h2 className="mt-5 text-4xl font-black tracking-tight">
+                  Ingia kwa password tu.
+                </h2>
+                <p className="mt-4 text-sm font-medium leading-6 text-zinc-800">
+                  Sehemu hii ni ya usimamizi wa HASH FOOD. Weka password ya admin ili kufungua dashboard,
+                  orders, users, restaurants, riders, analytics, na reports.
+                </p>
+              </div>
+
+              <form onSubmit={handleAdminLogin} className="p-6 sm:p-8">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-300">
+                    Secure Access
+                  </p>
+                  <h3 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+                    Admin Login
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-zinc-500">
+                    Hakuna email inayohitajika hapa. Password pekee inatosha kwa demo/local admin session.
+                  </p>
+                </div>
+
+                <label className="mt-8 block">
+                  <span className="text-sm font-semibold text-zinc-200">Password</span>
+                  <span className="mt-2 flex min-h-12 items-center gap-3 rounded-xl border border-white/[0.08] bg-black/25 px-4 focus-within:border-orange-400/50">
+                    <svg className="h-5 w-5 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+                      <rect x="5" y="10" width="14" height="10" rx="2" />
+                      <path d="M8 10V8a4 4 0 0 1 8 0v2" strokeLinecap="round" />
+                    </svg>
+                    <input
+                      value={adminPassword}
+                      onChange={(event) => setAdminPassword(event.target.value)}
+                      type="password"
+                      placeholder="Weka admin password"
+                      className="w-full bg-transparent text-sm text-white outline-none placeholder:text-zinc-600"
+                      autoComplete="current-password"
+                    />
+                  </span>
+                </label>
+
+                {adminLoginError ? (
+                  <p className="mt-4 rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                    {adminLoginError}
+                  </p>
+                ) : null}
+
+                <button
+                  type="submit"
+                  className="mt-6 flex min-h-12 w-full items-center justify-center rounded-xl bg-orange-500 px-5 text-sm font-bold text-zinc-950 transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+                  disabled={!adminPassword.trim()}
+                >
+                  Fungua Admin Dashboard
+                </button>
+
+                <p className="mt-5 text-xs leading-5 text-zinc-600">
+                  Default password ya local/demo ni <span className="font-semibold text-zinc-400">hashfood2026</span>.
+                  Kwenye deployment unaweza kubadilisha kwa kuweka env `NEXT_PUBLIC_ADMIN_PASSWORD`.
+                </p>
+              </form>
             </div>
           )}
         </div>

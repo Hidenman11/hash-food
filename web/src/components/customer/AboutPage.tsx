@@ -2,191 +2,61 @@
 
 import Link from "next/link";
 
-const features = [
-  {
-    title: "Uwasilishaji wa haraka",
-    detail: "Oda yako inafika kwa wakati na uhakika wa hali ya juu ukiwa nyumbani au ofisini.",
-    icon: (
-      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="m13 2-2 10h9L7 22l2-10H1L13 2Z" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    title: "Mfumo rafiki",
-    detail: "Tumeunda teknolojia rahisi inayomfanya yeyote aweze kuagiza bila usumbufu.",
-    icon: (
-      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <rect width="14" height="20" x="5" y="2" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M12 18h.01" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    title: "Malipo salama",
-    detail: "Mifumo yetu ya malipo ni salama na inakupa uhuru wa kulipia kwa njia unayopenda.",
-    icon: (
-      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    title: "Ushirikiano bora",
-    detail: "Tunashirikiana na migahawa bora ya ndani ili kuhakikisha unapata ladha unayotaka.",
-    icon: (
-      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M18 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
+const aboutParagraphs = [
+  "HASH FOOD ni jukwaa la kisasa la kuagiza chakula linalounganisha watu, migahawa, na wasafirishaji kwa njia rahisi, ya haraka, na ya kuaminika. Tunajenga mfumo unaoendana na maisha ya leo ambapo muda ni muhimu, na huduma bora siyo anasa bali ni hitaji.",
+  "Tunawawezesha wateja kupata chakula wanachokipenda kutoka kwa migahawa bora iliyo karibu nao bila usumbufu wa simu nyingi au kuchelewa kwa huduma. Kupitia teknolojia yetu, unaweza kuona menu, kulinganisha bei, kufuatilia oda yako moja kwa moja, na kupokea huduma kwa uwazi na uhakika.",
+  "Kwa upande wa migahawa, HASH FOOD siyo tu sehemu ya kupokea oda ni jukwaa la kukuza biashara. Tunawapa uwezo wa kufikia wateja wengi zaidi, kusimamia oda kwa ufanisi, na kuongeza mapato bila gharama kubwa za miundombinu. Kwa riders, tunaunda mfumo unaowapa kazi zilizo wazi, ratiba rahisi, na kipato kinachoeleweka.",
+  "Maono yetu ni kuwa mfumo unaoongoza Tanzania katika huduma za food delivery kwa kuzingatia ubora, kasi, na uzoefu wa mtumiaji. Tunataka kubadilisha namna watu wanavyoagiza na kupokea chakula kutoka kwenye changamoto hadi kwenye urahisi wa kiwango cha juu.",
+  "HASH FOOD siyo tu huduma ya delivery. Ni suluhisho linaloleta pamoja teknolojia, biashara, na maisha ya kila siku ili kufanya kila oda iwe rahisi, haraka, na yenye thamani zaidi kwa kila mtumiaji.",
 ];
 
-const stats = [
-  { value: "500+", label: "Migahawa", detail: "Washirika nchi nzima" },
-  { value: "10K+", label: "Wateja", detail: "Wanaotuamini kila siku" },
-  { value: "50K+", label: "Orders", detail: "Zimefika salama mlangoni" },
-  { value: "99%", label: "Uhakika", detail: "Uwasilishaji wa haraka" },
-];
-
-const values = [
-  {
-    title: "Ubunifu",
-    desc: "Tunatumia teknolojia ya kisasa kurahisisha maisha ya kila siku ya Mtanzania.",
-  },
-  {
-    title: "Uhakika",
-    desc: "Chakula chako kitafika kikiwa cha moto na kwa wakati, bila visingizio.",
-  },
-  {
-    title: "Jamii",
-    desc: "Tunajenga fursa za ajira kwa vijana na kukuza biashara za ndani.",
-  },
+const pillars = [
+  { title: "Wateja", detail: "Menu, bei, oda, na tracking vinaonekana kwa uwazi sehemu moja." },
+  { title: "Migahawa", detail: "Biashara zinapata oda zaidi na kusimamia huduma kwa ufanisi." },
+  { title: "Riders", detail: "Kazi zinaonekana wazi, ratiba ni rahisi, na kipato kinaeleweka." },
 ];
 
 export function AboutPage() {
   return (
     <section className="min-h-screen bg-[#07090d] text-zinc-300">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-        {/* Hero Header */}
-        <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0c1119] p-8 sm:p-12 lg:p-16">
-          <div className="relative z-10 max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-400">
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+        <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+          <div className="rounded-2xl border border-white/[0.08] bg-[#0c1119] p-6 sm:p-8 lg:sticky lg:top-24">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-300">
               Kuhusu HASH FOOD
             </p>
-            <h1 className="mt-6 text-4xl font-bold tracking-tight text-white sm:text-6xl">
-              Mapinduzi ya chakula <span className="text-orange-500">Tanzania.</span>
+            <h1 className="mt-5 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+              Teknolojia, chakula, na huduma bora kwa maisha ya kila siku.
             </h1>
-            <p className="mt-8 text-lg leading-8 text-zinc-400">
-              HASH FOOD ni jukwaa la kisasa linalowaunganisha wateja, migahawa, na wasafirishaji 
-              kupitia teknolojia yenye kasi, urahisi, na ufanisi wa hali ya juu.
+            <p className="mt-5 text-sm leading-6 text-zinc-400">
+              Tunajenga mfumo wa food delivery unaowahudumia wateja, migahawa, na wasafirishaji kwa
+              kasi, uwazi, na uhakika.
             </p>
-          </div>
-          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-orange-500/10 blur-[80px]" />
-        </div>
-
-        {/* Stats Section */}
-        <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-4 lg:gap-6">
-          {stats.map((stat, i) => (
-            <div
-              key={i}
-              className="rounded-3xl border border-white/[0.05] bg-white/[0.02] p-6 text-center transition hover:bg-white/[0.04]"
+            <Link
+              href="/restaurants"
+              className="mt-8 inline-flex min-h-12 items-center rounded-xl bg-orange-500 px-6 text-sm font-bold text-zinc-950 transition hover:bg-orange-400"
             >
-              <p className="text-3xl font-bold text-orange-500 sm:text-4xl">{stat.value}</p>
-              <p className="mt-2 text-sm font-semibold text-white">{stat.label}</p>
-              <p className="mt-1 text-xs text-zinc-500">{stat.detail}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Vision & Mission */}
-        <div className="mt-12 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border border-white/[0.08] bg-[#0c1119] p-8 transition hover:border-white/20">
-            <h2 className="text-xl font-bold text-white">Dira Yetu</h2>
-            <p className="mt-4 leading-7 text-zinc-400">
-              Kuwa jukwaa linaloongoza Afrika katika huduma za usambazaji wa chakula kwa kutumia 
-              teknolojia ya kisasa na uzoefu bora wa mtumiaji.
-            </p>
-          </div>
-          <div className="rounded-3xl border border-white/[0.08] bg-[#0c1119] p-8 transition hover:border-white/20">
-            <h2 className="text-xl font-bold text-white">Dhima Yetu</h2>
-            <ul className="mt-4 space-y-4">
-              {[
-                "Wateja kupata huduma bora ya chakula kwa urahisi",
-                "Migahawa kukuza biashara zao kidigitali",
-                "Vijana kupata fursa za ajira kupitia uchumi wa kidigitali",
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-3 text-sm">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange-500 text-xs font-black text-zinc-950">
-                    ✓
-                  </span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Core Values */}
-        <div className="mt-24">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Maadili Yetu</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-zinc-500">
-              Misingi inayotufanya kuwa jukwaa namba moja la uwasilishaji chakula.
-            </p>
-          </div>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {values.map((v, i) => (
-              <div key={i} className="rounded-3xl border border-white/[0.08] bg-black/20 p-8">
-                <h3 className="text-lg font-bold text-orange-400">{v.title}</h3>
-                <p className="mt-4 text-sm leading-6 text-zinc-400">{v.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Features Grid */}
-        <div className="mt-24">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Kwanini HASH FOOD?
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-zinc-500">
-              Tunaamini kuwa kuagiza chakula kunapaswa kuwa rahisi, haraka, na bila usumbufu.
-            </p>
-          </div>
-
-          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature, i) => (
-              <div key={i} className="group relative">
-                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.04] text-orange-500 ring-1 ring-white/10 transition group-hover:bg-orange-500 group-hover:text-zinc-950 group-hover:ring-orange-500">
-                  {feature.icon}
-                </div>
-                <h3 className="text-lg font-bold text-white">{feature.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-zinc-500">{feature.detail}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Closing Statement */}
-        <div className="mt-24 rounded-3xl bg-gradient-to-br from-orange-500 to-amber-600 p-8 text-zinc-950 sm:p-12 lg:p-16">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-2xl">
-              <p className="text-2xl font-bold leading-snug sm:text-3xl lg:text-4xl">
-                HASH FOOD si huduma ya kawaida ya delivery—ni jukwaa linalounganisha teknolojia na maisha.
-              </p>
-              <p className="mt-6 font-black uppercase tracking-[0.2em]">
-                Chakula chako, kwa kasi ya kisasa.
-              </p>
-            </div>
-            <Link href="/customer" className="flex h-14 shrink-0 items-center justify-center rounded-2xl bg-zinc-950 px-8 text-sm font-bold text-white transition hover:bg-zinc-900 active:scale-95">
-              Agiza Sasa
+              Angalia Migahawa
             </Link>
           </div>
+
+          <article className="rounded-2xl border border-white/[0.08] bg-[#0c1119] p-6 sm:p-8">
+            <h2 className="text-2xl font-semibold text-white">Kuhusu HASH FOOD</h2>
+            <div className="mt-6 space-y-5 text-base leading-8 text-zinc-300">
+              {aboutParagraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+              {pillars.map((pillar) => (
+                <div key={pillar.title} className="rounded-2xl border border-white/[0.07] bg-black/25 p-4">
+                  <h3 className="font-semibold text-orange-300">{pillar.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-zinc-500">{pillar.detail}</p>
+                </div>
+              ))}
+            </div>
+          </article>
         </div>
       </div>
     </section>

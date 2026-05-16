@@ -30,7 +30,8 @@ export const restaurants: Restaurant[] = [
     name: "Pizza Time",
     cuisines: "Pizza, Pasta, Italian",
     city: "Mwanza",
-    image: "/images/pizza.svg",
+    image:
+      "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=1000&q=90",
     rating: 4.8,
     deliveryMins: "25-35 min",
     distanceKm: 1.2,
@@ -43,7 +44,8 @@ export const restaurants: Restaurant[] = [
     name: "Mama's Kitchen",
     cuisines: "Pilau, Biryani, Local food",
     city: "Mwanza",
-    image: "/images/spice-route.svg",
+    image:
+      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=1000&q=90",
     rating: 4.7,
     deliveryMins: "20-30 min",
     distanceKm: 1.5,
@@ -55,7 +57,8 @@ export const restaurants: Restaurant[] = [
     name: "Chipsi Point",
     cuisines: "Chips, Chicken, Snacks",
     city: "Mwanza",
-    image: "/images/chicken.svg",
+    image:
+      "https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?auto=format&fit=crop&w=1000&q=90",
     rating: 4.5,
     deliveryMins: "15-25 min",
     distanceKm: 0.9,
@@ -68,7 +71,8 @@ export const restaurants: Restaurant[] = [
     name: "Burger House",
     cuisines: "Burgers, Fries, Drinks",
     city: "Mwanza",
-    image: "/images/burger.svg",
+    image:
+      "https://images.unsplash.com/photo-1553979459-b888fc870885?auto=format&fit=crop&w=1000&q=90",
     rating: 4.9,
     deliveryMins: "18-28 min",
     distanceKm: 2.1,
@@ -80,7 +84,8 @@ export const restaurants: Restaurant[] = [
     name: "Fresh Bowl",
     cuisines: "Salads, Bowls, Juice",
     city: "Mwanza",
-    image: "/images/fresh-bowl.svg",
+    image:
+      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1000&q=90",
     rating: 4.6,
     deliveryMins: "18-26 min",
     distanceKm: 2.4,
@@ -92,7 +97,8 @@ export const restaurants: Restaurant[] = [
     name: "Sweet Corner",
     cuisines: "Desserts, Coffee, Bakery",
     city: "Mwanza",
-    image: "/images/dessert.svg",
+    image:
+      "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1000&q=90",
     rating: 4.4,
     deliveryMins: "12-22 min",
     distanceKm: 0.6,
@@ -110,7 +116,8 @@ export const offers: Offer[] = [
     restaurant: "All restaurants",
     details: "Valid for new customers on food subtotal.",
     expires: "Tonight 11:59 PM",
-    image: "/images/pizza.svg",
+    image:
+      "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1000&q=90",
     minimumOrder: 12000,
     saving: "Up to TSh 8,000",
   },
@@ -121,7 +128,8 @@ export const offers: Offer[] = [
     restaurant: "Chipsi Point",
     details: "No rider fee for orders within 2 km.",
     expires: "May 15, 2026",
-    image: "/images/chicken.svg",
+    image:
+      "https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?auto=format&fit=crop&w=1000&q=90",
     minimumOrder: 8000,
     saving: "Save TSh 3,000",
   },
@@ -132,7 +140,8 @@ export const offers: Offer[] = [
     restaurant: "Mama's Kitchen",
     details: "Pilau or biryani combo with soda included.",
     expires: "Weekdays 11 AM - 3 PM",
-    image: "/images/spice-route.svg",
+    image:
+      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=1000&q=90",
     minimumOrder: 10000,
     saving: "20% off",
   },
@@ -143,7 +152,8 @@ export const offers: Offer[] = [
     restaurant: "Sweet Corner",
     details: "Applies to selected cakes, donuts, and coffee.",
     expires: "This weekend",
-    image: "/images/dessert.svg",
+    image:
+      "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1000&q=90",
     minimumOrder: 6000,
     saving: "BOGO",
   },

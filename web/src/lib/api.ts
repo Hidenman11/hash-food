@@ -1,3 +1,5 @@
+import { sampleRestaurants } from "@/lib/sample-restaurants";
+
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "";
 
@@ -383,6 +385,17 @@ export async function assignOrderRider(
   orderId: string,
   riderId: string,
 ): Promise<{ data: OrderResponse }> {
+  if (isLocalAdminSession()) {
+    return {
+      data: {
+        id: orderId,
+        status: "CONFIRMED",
+        totalTzs: localAdminOrders.find((order) => order.id === orderId)?.totalTzs ?? 0,
+        riderId,
+      },
+    };
+  }
+
   return await fetchJson<{ data: OrderResponse }>(
     `${API_BASE_URL}/v1/orders/${encodeURIComponent(orderId)}/assign-rider`,
     {
@@ -425,8 +438,131 @@ export type AdminAnalytics = {
   }>;
 };
 
+const localAdminOrders: AdminOrder[] = [
+  {
+    id: "order_local_1001",
+    customerId: "customer_asha",
+    restaurantId: "rest_pizza_time",
+    riderId: "rider_juma",
+    status: "EN_ROUTE",
+    totalTzs: 32000,
+    subtotalTzs: 30000,
+    deliveryFeeTzs: 2000,
+    deliveryAddress: "Capri Point, Mwanza",
+    deliveryLat: -2.5239,
+    deliveryLng: 32.9002,
+    notes: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    customer: { fullName: "Asha Juma", phone: "255712345678", email: "asha@example.com" },
+    restaurant: { name: "Pizza Time", address: "Rock City Mall, Mwanza" },
+    rider: { user: { fullName: "Juma Rider", phone: "255755111222" } },
+    items: [{ quantity: 2, unitPriceTzs: 15000, menuItem: { name: "Pepperoni Pizza" } }],
+  },
+  {
+    id: "order_local_1002",
+    customerId: "customer_musa",
+    restaurantId: "rest_burger_house",
+    riderId: null,
+    status: "PREPARING",
+    totalTzs: 14500,
+    subtotalTzs: 13000,
+    deliveryFeeTzs: 1500,
+    deliveryAddress: "Pasiansi, Mwanza",
+    deliveryLat: -2.4824,
+    deliveryLng: 32.9229,
+    notes: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    customer: { fullName: "Musa Ally", phone: "255713444555", email: "musa@example.com" },
+    restaurant: { name: "Burger House", address: "Capri Point, Mwanza" },
+    rider: null,
+    items: [{ quantity: 1, unitPriceTzs: 13000, menuItem: { name: "Classic Beef Burger" } }],
+  },
+];
+
+const localAdminRiders: AdminRider[] = [
+  {
+    id: "rider_juma",
+    vehicleType: "Motorbike",
+    licensePlate: "MC 204 HASH",
+    isOnline: true,
+    currentLat: -2.5164,
+    currentLng: 32.9175,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    user: { fullName: "Juma Rider", email: "juma.rider@example.com", phone: "255755111222" },
+    _count: { orders: 24 },
+  },
+  {
+    id: "rider_neema",
+    vehicleType: "Scooter",
+    licensePlate: "MC 118 HASH",
+    isOnline: false,
+    currentLat: -2.5239,
+    currentLng: 32.9002,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    user: { fullName: "Neema Rider", email: "neema.rider@example.com", phone: "255766333444" },
+    _count: { orders: 18 },
+  },
+];
+
+function isLocalAdminSession() {
+  return typeof window !== "undefined" && localStorage.getItem("hashfood_token") === "local-admin-session";
+}
+
 export async function getAdminStats(): Promise<{ data: AdminStats }> {
   const token = localStorage.getItem("hashfood_token");
+  if (isLocalAdminSession()) {
+    return {
+      data: {
+        overview: {
+          totalOrders: 1284,
+          ordersThisWeek: 186,
+          revenueThisWeek: 14850000,
+          totalUsers: 342,
+          activeRiders: localAdminRiders.filter((rider) => rider.isOnline).length,
+          totalRestaurants: sampleRestaurants.length,
+        },
+        recentOrders: localAdminOrders.map((order) => ({
+          id: order.id,
+          customer: order.customer.fullName || order.customer.email,
+          restaurant: order.restaurant.name,
+          rider: order.rider?.user.fullName ?? null,
+          total: order.totalTzs,
+          status: order.status,
+          createdAt: order.createdAt,
+        })),
+        activeDeliveries: [
+          {
+            id: localAdminOrders[0].id,
+            customer: {
+              name: localAdminOrders[0].customer.fullName ?? "Customer",
+              phone: localAdminOrders[0].customer.phone ?? "",
+              lat: -2.5239,
+              lng: 32.9002,
+            },
+            restaurant: {
+              name: localAdminOrders[0].restaurant.name,
+              address: localAdminOrders[0].restaurant.address,
+              lat: -2.5164,
+              lng: 32.9175,
+            },
+            rider: {
+              name: "Juma Rider",
+              phone: "255755111222",
+              lat: -2.5201,
+              lng: 32.9086,
+            },
+            status: localAdminOrders[0].status,
+            eta: 14,
+          },
+        ],
+      },
+    };
+  }
+
   const headers: Record<string, string> = {};
   if (token) {
     headers.Authorization = `Bearer ${token}`;
@@ -453,6 +589,13 @@ export async function getAdminOrders(params?: {
   riderId?: string;
 }): Promise<{ data: AdminOrder[]; pagination: Pagination }> {
   const token = localStorage.getItem("hashfood_token");
+  if (isLocalAdminSession()) {
+    return {
+      data: localAdminOrders,
+      pagination: { page: params?.page ?? 1, limit: params?.limit ?? 100, total: localAdminOrders.length, totalPages: 1 },
+    };
+  }
+
   const searchParams = new URLSearchParams();
 
   if (params?.page) searchParams.set("page", params.page.toString());
@@ -480,6 +623,34 @@ export async function getAdminUsers(params?: {
   role?: string;
 }): Promise<{ data: AdminUser[]; pagination: Pagination }> {
   const token = localStorage.getItem("hashfood_token");
+  if (isLocalAdminSession()) {
+    const users: AdminUser[] = [
+      {
+        id: "admin_local",
+        email: "admin@hashfood.local",
+        fullName: "HASH FOOD Admin",
+        phone: null,
+        role: "ADMIN",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      ...localAdminOrders.map((order) => ({
+        id: order.customerId,
+        email: order.customer.email,
+        fullName: order.customer.fullName,
+        phone: order.customer.phone,
+        role: "CUSTOMER",
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+      })),
+    ];
+
+    return {
+      data: users,
+      pagination: { page: params?.page ?? 1, limit: params?.limit ?? 100, total: users.length, totalPages: 1 },
+    };
+  }
+
   const searchParams = new URLSearchParams();
 
   if (params?.page) searchParams.set("page", params.page.toString());
@@ -505,6 +676,31 @@ export async function getAdminRestaurants(params?: {
   isActive?: boolean;
 }): Promise<{ data: AdminRestaurant[]; pagination: Pagination }> {
   const token = localStorage.getItem("hashfood_token");
+  if (isLocalAdminSession()) {
+    const restaurants: AdminRestaurant[] = sampleRestaurants.map((restaurant) => ({
+      id: restaurant.id,
+      name: restaurant.name,
+      slug: restaurant.slug,
+      description: restaurant.description,
+      address: restaurant.address,
+      phone: null,
+      email: null,
+      lat: restaurant.lat,
+      lng: restaurant.lng,
+      deliveryFeeTzs: restaurant.deliveryFeeTzs,
+      isActive: restaurant.isActive,
+      createdAt: restaurant.createdAt,
+      updatedAt: restaurant.updatedAt,
+      owner: { fullName: "HASH FOOD Partner", email: "partner@hashfood.local" },
+      _count: { menu: restaurant.menuCount, orders: Math.floor(restaurant.rating * 10) },
+    }));
+
+    return {
+      data: restaurants,
+      pagination: { page: params?.page ?? 1, limit: params?.limit ?? 100, total: restaurants.length, totalPages: 1 },
+    };
+  }
+
   const searchParams = new URLSearchParams();
 
   if (params?.page) searchParams.set("page", params.page.toString());
@@ -530,6 +726,13 @@ export async function getAdminRiders(params?: {
   isActive?: boolean;
 }): Promise<{ data: AdminRider[]; pagination: Pagination }> {
   const token = localStorage.getItem("hashfood_token");
+  if (isLocalAdminSession()) {
+    return {
+      data: localAdminRiders,
+      pagination: { page: params?.page ?? 1, limit: params?.limit ?? 100, total: localAdminRiders.length, totalPages: 1 },
+    };
+  }
+
   const searchParams = new URLSearchParams();
 
   if (params?.page) searchParams.set("page", params.page.toString());

@@ -181,14 +181,17 @@ export function RestaurantsPage({ initialQuery = "", initialCategory }: Restaura
             </button>
           </div>
         ) : loading ? (
-          <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <RestaurantSkeleton key={index} />
-            ))}
-          </div>
+          <>
+            <p className="mt-5 text-sm font-semibold text-zinc-300">Loading restaurants...</p>
+            <div className="mt-4 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <RestaurantSkeleton key={index} />
+              ))}
+            </div>
+          </>
         ) : showEmpty ? (
           <div className="mt-5 rounded-2xl border border-white/[0.08] bg-[#0c1119] p-8 text-center">
-            <p className="text-lg font-semibold text-white">No restaurants found</p>
+            <p className="text-lg font-semibold text-white">No restaurants available</p>
             <p className="mt-2 text-sm text-zinc-500">
               {restaurants.length
                 ? "Try a different cuisine filter or clear your search."
