@@ -1,10 +1,21 @@
 import type { Metadata } from "next";
 import { AuthForm } from "@/components/auth/AuthForm";
 
+type SignupRole = "CUSTOMER" | "RESTAURANT_ADMIN" | "RIDER";
+
 export const metadata: Metadata = {
   title: "Sign Up",
   description: "Create a HASH FOOD account.",
 };
+
+function parseRole(role?: string): SignupRole {
+  const normalized = role?.trim().toUpperCase();
+  if (normalized === "RIDER") return "RIDER";
+  if (normalized === "RESTAURANT" || normalized === "RESTAURANT_ADMIN") {
+    return "RESTAURANT_ADMIN";
+  }
+  return "CUSTOMER";
+}
 
 export default async function SignupPage({
   searchParams,
@@ -17,12 +28,7 @@ export default async function SignupPage({
   }>;
 }) {
   const params = await searchParams;
-  const initialRole =
-    params.role === "rider"
-      ? "RIDER"
-      : params.role === "restaurant"
-        ? "RESTAURANT_ADMIN"
-        : "CUSTOMER";
+  const initialRole = parseRole(params.role);
 
   return (
     <AuthForm

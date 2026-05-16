@@ -135,6 +135,14 @@ const popularItems = [
   { name: "Hash Burger", count: 57 },
 ];
 
+const statusStyles: Record<OrderStatus, string> = {
+  Pending: styles.statusPending,
+  Preparing: styles.statusPreparing,
+  Ready: styles.statusReady,
+  Delivered: styles.statusDelivered,
+  Rejected: styles.statusRejected,
+};
+
 function Sidebar({ active, onChange }: { active: string; onChange: (key: string) => void }) {
   return (
     <aside className={styles.sidebar}>
@@ -218,7 +226,7 @@ function OrdersSection({ orders, onUpdate }: { orders: Order[]; onUpdate: (id: s
                 <p className={styles.orderId}>{order.id}</p>
                 <p className={styles.orderMeta}>{order.customer} · {order.time}</p>
               </div>
-              <span className={styles.statusPill}>{order.status}</span>
+              <span className={`${styles.statusPill} ${statusStyles[order.status]}`}>{order.status}</span>
             </div>
             <div className={styles.orderItems}>
               {order.items.map((item) => (
@@ -287,7 +295,7 @@ function MenuSection({ items, onToggle, onDelete, onEdit, onAdd }: { items: Menu
             className={styles.inputField}
             onChange={(event) => setPrice(event.target.value)}
           />
-          <button type="button" className={styles.primaryButton} onClick={() => { onAdd(name.trim(), `TSh ${Number(price).toLocaleString()}`); setName(""); setPrice(""); }}>
+          <button type="button" className={styles.primaryButton} onClick={() => { if (!name.trim() || !price.trim()) return; onAdd(name.trim(), `TSh ${Number(price).toLocaleString()}`); setName(""); setPrice(""); }}>
             Add item
           </button>
         </div>

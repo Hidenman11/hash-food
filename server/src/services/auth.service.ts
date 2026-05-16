@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
+import { Prisma } from "@prisma/client";
 import { config } from "../config.js";
 import { prisma } from "../lib/prisma.js";
 import type { UserRole } from "@prisma/client";
@@ -12,22 +13,33 @@ export async function registerUser(input: {
   fullName?: string;
   role?: UserRole;
 }) {
-  const existing = await prisma.user.findUnique({ where: { email: input.email } });
+  const email = input.email.trim().toLowerCase();
+  const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
     const err = new Error("Email already registered");
     (err as Error & { status?: number }).status = 409;
     throw err;
   }
   const passwordHash = await bcrypt.hash(input.password, 12);
-  const user = await prisma.user.create({
-    data: {
-      email: input.email.toLowerCase(),
-      passwordHash,
-      phone: input.phone,
-      fullName: input.fullName,
-      role: (input.role ?? "CUSTOMER") as UserRole,
-    },
-  });
+  let user;
+  try {
+    user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        phone: input.phone?.trim() || undefined,
+        fullName: input.fullName?.trim() || undefined,
+        role: (input.role ?? "CUSTOMER") as UserRole,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      const err = new Error("Email already registered");
+      (err as Error & { status?: number }).status = 409;
+      throw err;
+    }
+    throw error;
+  }
   return { user: sanitizeUser(user), token: signToken(user) };
 }
 

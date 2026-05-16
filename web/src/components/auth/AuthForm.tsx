@@ -129,10 +129,17 @@ export function AuthForm({ mode, initialRole = "CUSTOMER", initialEmail = "", in
         | null;
 
       if (!response.ok) {
-        const error =
+        let error =
           data && "error" in data && typeof data.error === "string"
             ? data.error
             : "Hatukuweza kukamilisha request. Hakiki taarifa zako.";
+
+        if (!data && response.status >= 500) {
+          error = "Backend haipatikani kwa sasa. Hakiki BACKEND_URL kwenye deployment.";
+        } else if (!data && response.status === 404) {
+          error = "API ya registration haijapatikana. Hakiki backend deployment.";
+        }
+
         throw new Error(error);
       }
 
@@ -193,7 +200,13 @@ export function AuthForm({ mode, initialRole = "CUSTOMER", initialEmail = "", in
       router.push(routeForRole(auth.user.role));
     } catch (error) {
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : "Kuna tatizo limetokea.");
+      setMessage(
+        error instanceof TypeError
+          ? "Backend haipatikani kwa sasa. Hakiki API URL/deployment."
+          : error instanceof Error
+            ? error.message
+            : "Kuna tatizo limetokea.",
+      );
     }
   }
 

@@ -1,9 +1,16 @@
 import type { NextConfig } from "next";
 
-const backendUrl =
+const configuredBackendUrl =
   process.env.BACKEND_URL?.replace(/\/$/, "") ??
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ??
-  "http://localhost:4000";
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+
+if (process.env.NODE_ENV === "production" && !configuredBackendUrl) {
+  console.warn(
+    "BACKEND_URL is not set. Production auth/API requests will not work until the deployed backend URL is configured.",
+  );
+}
+
+const backendUrl = configuredBackendUrl ?? "http://localhost:4000";
 
 const nextConfig: NextConfig = {
   images: {

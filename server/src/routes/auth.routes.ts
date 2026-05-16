@@ -7,6 +7,13 @@ import type { UserRole } from "@prisma/client";
 
 const router = Router();
 
+function validationMessage(error: z.ZodError) {
+  const first = error.issues[0];
+  if (!first) return "Invalid registration details";
+  const field = first.path.join(".");
+  return field ? `${field}: ${first.message}` : first.message;
+}
+
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
@@ -19,7 +26,7 @@ const registerSchema = z.object({
 router.post("/register", async (req, res) => {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.flatten() });
+    res.status(400).json({ error: validationMessage(parsed.error) });
     return;
   }
   try {
@@ -39,7 +46,7 @@ const loginSchema = z.object({
 router.post("/login", async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.flatten() });
+    res.status(400).json({ error: validationMessage(parsed.error) });
     return;
   }
   try {
