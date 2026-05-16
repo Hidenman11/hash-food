@@ -1,6 +1,6 @@
-import Image from "next/image";
 import styles from "./RestaurantDashboard.module.css";
 import type { MenuItem } from "./types";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 type MenuItemCardProps = {
   item: MenuItem;
@@ -13,7 +13,7 @@ export function MenuItemCard({ item, onToggleAvailable, onEdit, onDelete }: Menu
   return (
     <article className={styles.menuCard}>
       <div className={styles.menuImageWrap}>
-        <Image className={styles.menuImage} src={item.image} alt={item.name} fill sizes="150px" />
+        <SafeImage className={styles.menuImage} src={item.image} alt={item.name} fill sizes="150px" />
       </div>
       <div className={styles.menuBody}>
         <div className={styles.menuHeader}>

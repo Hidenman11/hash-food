@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useMemo, useState } from "react";
 import styles from "./RestaurantDashboard.module.css";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 type OrderStatus = "Pending" | "Preparing" | "Ready" | "Delivered" | "Rejected";
 
@@ -80,28 +80,32 @@ const initialMenu: MenuItem[] = [
     name: "Spicy Chicken Pizza",
     price: "TSh 19,000",
     available: true,
-    image: "/images/pizza.svg",
+    image:
+      "/images/pizza.jpg",
   },
   {
     id: "2",
     name: "Beef Pilau",
     price: "TSh 14,500",
     available: true,
-    image: "/images/spice-route.svg",
+    image:
+      "/images/rice.jpg",
   },
   {
     id: "3",
     name: "Hash Burger",
     price: "TSh 11,200",
     available: false,
-    image: "/images/burger.svg",
+    image:
+      "/images/burger.jpg",
   },
   {
     id: "4",
     name: "Sushi Delight",
     price: "TSh 23,000",
     available: true,
-    image: "/images/fresh-bowl.svg",
+    image:
+      "/images/sushi.jpg",
   },
 ];
 
@@ -304,7 +308,7 @@ function MenuSection({ items, onToggle, onDelete, onEdit, onAdd }: { items: Menu
         {items.map((item) => (
           <div key={item.id} className={styles.menuCard}>
             <div className={styles.menuImageWrap}>
-              <Image className={styles.menuImage} src={item.image} alt={item.name} fill sizes="150px" />
+              <SafeImage className={styles.menuImage} src={item.image} alt={item.name} fill sizes="150px" />
             </div>
             <div className={styles.menuInfo}>
               {editId === item.id ? (

@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 export type RestaurantCardProps = {
   name: string;
@@ -36,7 +36,7 @@ export function RestaurantCard({
       )}
     >
       <div className="relative aspect-[5/3] w-full overflow-hidden">
-        <Image
+        <SafeImage
           src={image}
           alt={imageAlt}
           fill

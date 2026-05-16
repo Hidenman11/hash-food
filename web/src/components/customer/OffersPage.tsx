@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/cn";
 import { formatTzs, offers } from "./customer-data";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 const offerCartItems: Record<
   string,
@@ -14,25 +14,29 @@ const offerCartItems: Record<
     name: "Chicken pizza offer",
     price: 12000,
     restaurant: "Pizza Time",
-    image: "/images/pizza.svg",
+    image:
+      "/images/pizza.jpg",
   },
   freebike: {
     name: "Chips mayai delivery offer",
     price: 6000,
     restaurant: "Chipsi Point",
-    image: "/images/chicken.svg",
+    image:
+      "/images/chicken.jpg",
   },
   lunch20: {
     name: "Beef pilau lunch combo",
     price: 9500,
     restaurant: "Mama's Kitchen",
-    image: "/images/spice-route.svg",
+    image:
+      "/images/rice.jpg",
   },
   sweet2: {
     name: "Dessert combo offer",
     price: 6000,
     restaurant: "Sweet Corner",
-    image: "/images/dessert.svg",
+    image:
+      "/images/dessert.jpg",
   },
 };
 
@@ -99,7 +103,7 @@ export function OffersPage() {
           {offers.map((offer) => (
             <article key={offer.id} className="grid overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c1119] sm:grid-cols-[13rem_1fr]">
               <div className="relative min-h-56 sm:min-h-full">
-                <Image src={offer.image} alt={offer.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 208px" />
+                <SafeImage src={offer.image} alt={offer.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 208px" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent sm:bg-gradient-to-r" />
               </div>
               <div className="p-5">

@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import { cn } from "@/lib/cn";
 import { formatTzs } from "./customer-data";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 type FeaturedOffer = {
   id: string;
@@ -23,7 +23,8 @@ const featuredOffers: FeaturedOffer[] = [
     restaurant: "Burger House",
     price: 7000,
     oldPrice: 14000,
-    image: "/images/burger.svg",
+    image:
+      "/images/burger.jpg",
     eta: "18-28 min",
     rating: "4.9",
   },
@@ -33,7 +34,8 @@ const featuredOffers: FeaturedOffer[] = [
     restaurant: "Pizza Time",
     price: 12000,
     oldPrice: 24000,
-    image: "/images/pizza.svg",
+    image:
+      "/images/pizza.jpg",
     eta: "25-35 min",
     rating: "4.8",
   },
@@ -43,7 +45,8 @@ const featuredOffers: FeaturedOffer[] = [
     restaurant: "Mama's Kitchen",
     price: 9500,
     oldPrice: 13000,
-    image: "/images/spice-route.svg",
+    image:
+      "/images/rice.jpg",
     eta: "20-30 min",
     rating: "4.7",
   },
@@ -103,7 +106,7 @@ export function FeaturedOfferCard() {
 
       <div className="mt-4 flex gap-4">
         <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-zinc-900 ring-1 ring-white/10">
-          <Image
+          <SafeImage
             src={selected.image}
             alt={selected.name}
             fill
@@ -151,7 +154,7 @@ export function FeaturedOfferCard() {
             )}
             aria-label={`Choose ${offer.name}`}
           >
-            <Image src={offer.image} alt={offer.name} fill className="object-cover" sizes="82px" />
+            <SafeImage src={offer.image} alt={offer.name} fill className="object-cover" sizes="82px" />
             <span className="absolute inset-x-0 bottom-0 bg-black/70 px-1.5 py-1 text-left text-[10px] font-semibold leading-tight text-white">
               {offer.name}
             </span>

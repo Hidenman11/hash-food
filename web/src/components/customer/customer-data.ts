@@ -31,7 +31,7 @@ export const restaurants: Restaurant[] = [
     cuisines: "Pizza, Pasta, Italian",
     city: "Mwanza",
     image:
-      "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=1000&q=90",
+      "/images/pizza.jpg",
     rating: 4.8,
     deliveryMins: "25-35 min",
     distanceKm: 1.2,
@@ -45,7 +45,7 @@ export const restaurants: Restaurant[] = [
     cuisines: "Pilau, Biryani, Local food",
     city: "Mwanza",
     image:
-      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=1000&q=90",
+      "/images/spice-route.jpg",
     rating: 4.7,
     deliveryMins: "20-30 min",
     distanceKm: 1.5,
@@ -58,7 +58,7 @@ export const restaurants: Restaurant[] = [
     cuisines: "Chips, Chicken, Snacks",
     city: "Mwanza",
     image:
-      "https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?auto=format&fit=crop&w=1000&q=90",
+      "/images/chicken.jpg",
     rating: 4.5,
     deliveryMins: "15-25 min",
     distanceKm: 0.9,
@@ -72,7 +72,7 @@ export const restaurants: Restaurant[] = [
     cuisines: "Burgers, Fries, Drinks",
     city: "Mwanza",
     image:
-      "https://images.unsplash.com/photo-1553979459-b888fc870885?auto=format&fit=crop&w=1000&q=90",
+      "/images/burger.jpg",
     rating: 4.9,
     deliveryMins: "18-28 min",
     distanceKm: 2.1,
@@ -85,7 +85,7 @@ export const restaurants: Restaurant[] = [
     cuisines: "Salads, Bowls, Juice",
     city: "Mwanza",
     image:
-      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1000&q=90",
+      "/images/fresh-bowl.jpg",
     rating: 4.6,
     deliveryMins: "18-26 min",
     distanceKm: 2.4,
@@ -98,7 +98,7 @@ export const restaurants: Restaurant[] = [
     cuisines: "Desserts, Coffee, Bakery",
     city: "Mwanza",
     image:
-      "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1000&q=90",
+      "/images/dessert.jpg",
     rating: 4.4,
     deliveryMins: "12-22 min",
     distanceKm: 0.6,
@@ -117,7 +117,7 @@ export const offers: Offer[] = [
     details: "Valid for new customers on food subtotal.",
     expires: "Tonight 11:59 PM",
     image:
-      "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1000&q=90",
+      "/images/pizza.jpg",
     minimumOrder: 12000,
     saving: "Up to TSh 8,000",
   },
@@ -129,7 +129,7 @@ export const offers: Offer[] = [
     details: "No rider fee for orders within 2 km.",
     expires: "May 15, 2026",
     image:
-      "https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?auto=format&fit=crop&w=1000&q=90",
+      "/images/chicken.jpg",
     minimumOrder: 8000,
     saving: "Save TSh 3,000",
   },
@@ -141,7 +141,7 @@ export const offers: Offer[] = [
     details: "Pilau or biryani combo with soda included.",
     expires: "Weekdays 11 AM - 3 PM",
     image:
-      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=1000&q=90",
+      "/images/spice-route.jpg",
     minimumOrder: 10000,
     saving: "20% off",
   },
@@ -153,7 +153,7 @@ export const offers: Offer[] = [
     details: "Applies to selected cakes, donuts, and coffee.",
     expires: "This weekend",
     image:
-      "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1000&q=90",
+      "/images/dessert.jpg",
     minimumOrder: 6000,
     saving: "BOGO",
   },

@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/cn";
 import { formatTzs } from "./customer-data";
 import { getRestaurants, type RestaurantSummary } from "@/lib/api";
 import { FALLBACK_IMAGE } from "@/lib/sample-restaurants";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 const filters = ["All", "Pizza", "Chicken", "Rice", "Burger", "Healthy", "Dessert"] as const;
 
@@ -22,21 +22,6 @@ function matchCategoryFilter(name: string, description: string | null | undefine
 
 function getRestaurantImage(restaurant: RestaurantSummary) {
   return restaurant.image || FALLBACK_IMAGE;
-}
-
-function SafeRestaurantImage({ restaurant }: { restaurant: RestaurantSummary }) {
-  const [src, setSrc] = useState(getRestaurantImage(restaurant));
-
-  return (
-    <Image
-      src={src}
-      alt={restaurant.name}
-      fill
-      className="object-cover transition duration-700 group-hover:scale-[1.03]"
-      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-      onError={() => setSrc(FALLBACK_IMAGE)}
-    />
-  );
 }
 
 function RestaurantSkeleton() {
@@ -206,7 +191,14 @@ export function RestaurantsPage({ initialQuery = "", initialCategory }: Restaura
                 className="group overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c1119] shadow-[0_24px_60px_-36px_rgba(0,0,0,0.95)] transition hover:-translate-y-1 hover:border-orange-400/35"
               >
                 <div className="relative aspect-[5/3] bg-[#111]">
-                  <SafeRestaurantImage key={restaurant.image ?? restaurant.slug} restaurant={restaurant} />
+                  <SafeImage
+                    key={restaurant.image ?? restaurant.slug}
+                    src={getRestaurantImage(restaurant)}
+                    alt={restaurant.name}
+                    fill
+                    className="object-cover transition duration-700 group-hover:scale-[1.03]"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/15 to-transparent" />
                   <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-3 p-3">
                     <span className="rounded-full bg-black/65 px-3 py-1 text-xs font-bold text-amber-300">

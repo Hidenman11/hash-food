@@ -50,7 +50,7 @@ export const sampleRestaurants: SampleRestaurant[] = [
     deliveryMins: "25-35 min",
     distanceKm: 1.2,
     image:
-      "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=1200&q=90",
+      "/images/pizza.jpg",
     tags: ["Pizza", "Pasta", "Popular"],
     isActive: true,
     createdAt: "2026-01-01T00:00:00.000Z",
@@ -72,7 +72,7 @@ export const sampleRestaurants: SampleRestaurant[] = [
     deliveryMins: "15-25 min",
     distanceKm: 0.8,
     image:
-      "https://images.unsplash.com/photo-1553979459-b888fc870885?auto=format&fit=crop&w=1200&q=90",
+      "/images/burger.jpg",
     tags: ["Burger", "Fast", "Fries"],
     isActive: true,
     createdAt: "2026-01-01T00:00:00.000Z",
@@ -94,7 +94,7 @@ export const sampleRestaurants: SampleRestaurant[] = [
     deliveryMins: "25-35 min",
     distanceKm: 2.1,
     image:
-      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=1200&q=90",
+      "/images/spice-route.jpg",
     tags: ["Rice", "Curry", "Local"],
     isActive: true,
     createdAt: "2026-01-01T00:00:00.000Z",
@@ -116,7 +116,7 @@ export const sampleRestaurants: SampleRestaurant[] = [
     deliveryMins: "18-28 min",
     distanceKm: 1.5,
     image:
-      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=90",
+      "/images/fresh-bowl.jpg",
     tags: ["Healthy", "Salads", "Drinks"],
     isActive: true,
     createdAt: "2026-01-01T00:00:00.000Z",
@@ -138,7 +138,7 @@ export const sampleRestaurants: SampleRestaurant[] = [
     deliveryMins: "12-22 min",
     distanceKm: 0.6,
     image:
-      "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=90",
+      "/images/dessert.jpg",
     tags: ["Dessert", "Coffee", "Bakery"],
     isActive: true,
     createdAt: "2026-01-01T00:00:00.000Z",
@@ -160,7 +160,7 @@ export const sampleRestaurants: SampleRestaurant[] = [
     deliveryMins: "15-25 min",
     distanceKm: 0.9,
     image:
-      "https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?auto=format&fit=crop&w=1200&q=90",
+      "/images/chicken.jpg",
     tags: ["Chicken", "Snacks", "Budget"],
     isActive: true,
     createdAt: "2026-01-01T00:00:00.000Z",
@@ -170,34 +170,34 @@ export const sampleRestaurants: SampleRestaurant[] = [
 
 export const sampleMenuItems: Record<string, SampleMenuItem[]> = {
   "pizza-time": [
-    menu("pizza_margherita", "rest_pizza_time", "Margherita Pizza", "Tomato, mozzarella, basil.", 14000, "/images/pizza.svg", 1),
-    menu("pizza_pepperoni", "rest_pizza_time", "Pepperoni Pizza", "Smoky pepperoni and mozzarella.", 18000, "/images/pizza.svg", 2),
-    menu("pizza_pasta", "rest_pizza_time", "Creamy Pasta", "Penne with garlic cream sauce.", 12000, "/images/spice-route.svg", 3),
+    menu("pizza_margherita", "rest_pizza_time", "Margherita Pizza", "Tomato, mozzarella, basil.", 14000, "/images/pizza.jpg", 1),
+    menu("pizza_pepperoni", "rest_pizza_time", "Pepperoni Pizza", "Smoky pepperoni and mozzarella.", 18000, "/images/pizza.jpg", 2),
+    menu("pizza_pasta", "rest_pizza_time", "Creamy Pasta", "Penne with garlic cream sauce.", 12000, "/images/pasta.jpg", 3),
   ],
   "burger-house": [
-    menu("burger_classic", "rest_burger_house", "Classic Beef Burger", "Beef patty, cheese, pickles.", 13000, "/images/burger.svg", 1),
-    menu("burger_chicken", "rest_burger_house", "Crispy Chicken Burger", "Crunchy chicken and slaw.", 12000, "/images/chicken.svg", 2),
-    menu("burger_fries", "rest_burger_house", "Loaded Fries", "Fries, sauce, and cheese.", 7000, "/images/burger.svg", 3),
+    menu("burger_classic", "rest_burger_house", "Classic Beef Burger", "Beef patty, cheese, pickles.", 13000, "/images/burger.jpg", 1),
+    menu("burger_chicken", "rest_burger_house", "Crispy Chicken Burger", "Crunchy chicken and slaw.", 12000, "/images/burger.jpg", 2),
+    menu("burger_fries", "rest_burger_house", "Loaded Fries", "Fries, sauce, and cheese.", 7000, "/images/fries.jpg", 3),
   ],
   "spice-route": [
-    menu("spice_biryani", "rest_spice_route", "Chicken Biryani", "Fragrant rice and spiced chicken.", 15000, "/images/spice-route.svg", 1),
-    menu("spice_pilau", "rest_spice_route", "Beef Pilau", "Local pilau with kachumbari.", 12000, "/images/rice.svg", 2),
-    menu("spice_curry", "rest_spice_route", "Paneer Curry", "Creamy curry with chapati.", 14000, "/images/spice-route.svg", 3),
+    menu("spice_biryani", "rest_spice_route", "Chicken Biryani", "Fragrant rice and spiced chicken.", 15000, "/images/rice.jpg", 1),
+    menu("spice_pilau", "rest_spice_route", "Beef Pilau", "Local pilau with kachumbari.", 12000, "/images/rice.jpg", 2),
+    menu("spice_curry", "rest_spice_route", "Paneer Curry", "Creamy curry with chapati.", 14000, "/images/spice-route.jpg", 3),
   ],
   "fresh-bowl": [
-    menu("fresh_green", "rest_fresh_bowl", "Green Power Bowl", "Greens, avocado, grains.", 11000, "/images/fresh-bowl.svg", 1),
-    menu("fresh_chicken", "rest_fresh_bowl", "Grilled Chicken Bowl", "Chicken, rice, vegetables.", 13000, "/images/fresh-bowl.svg", 2),
-    menu("fresh_juice", "rest_fresh_bowl", "Passion Juice", "Fresh passion fruit juice.", 5000, "/images/drinks.svg", 3),
+    menu("fresh_green", "rest_fresh_bowl", "Green Power Bowl", "Greens, avocado, grains.", 11000, "/images/fresh-bowl.jpg", 1),
+    menu("fresh_chicken", "rest_fresh_bowl", "Grilled Chicken Bowl", "Chicken, rice, vegetables.", 13000, "/images/fresh-bowl.jpg", 2),
+    menu("fresh_juice", "rest_fresh_bowl", "Passion Juice", "Fresh passion fruit juice.", 5000, "/images/drinks.jpg", 3),
   ],
   "sweet-corner": [
-    menu("sweet_cake", "rest_sweet_corner", "Chocolate Cake", "Soft chocolate slice.", 6000, "/images/dessert.svg", 1),
-    menu("sweet_donut", "rest_sweet_corner", "Glazed Donuts", "Box of two donuts.", 5000, "/images/dessert.svg", 2),
-    menu("sweet_coffee", "rest_sweet_corner", "Iced Coffee", "Cold coffee with milk.", 4500, "/images/drinks.svg", 3),
+    menu("sweet_cake", "rest_sweet_corner", "Chocolate Cake", "Soft chocolate slice.", 6000, "/images/dessert.jpg", 1),
+    menu("sweet_donut", "rest_sweet_corner", "Glazed Donuts", "Box of two donuts.", 5000, "/images/dessert.jpg", 2),
+    menu("sweet_coffee", "rest_sweet_corner", "Iced Coffee", "Cold coffee with milk.", 4500, "/images/coffee.jpg", 3),
   ],
   "chipsi-point": [
-    menu("chipsi_mayai", "rest_chipsi_point", "Chipsi Mayai", "Fries cooked with eggs.", 7000, "/images/chicken.svg", 1),
-    menu("chipsi_chicken", "rest_chipsi_point", "Chicken & Chips", "Grilled chicken with fries.", 11000, "/images/chicken.svg", 2),
-    menu("chipsi_mishkaki", "rest_chipsi_point", "Mishkaki Plate", "Skewers, chips, kachumbari.", 10000, "/images/chicken.svg", 3),
+    menu("chipsi_mayai", "rest_chipsi_point", "Chipsi Mayai", "Fries cooked with eggs.", 7000, "/images/chicken.jpg", 1),
+    menu("chipsi_chicken", "rest_chipsi_point", "Chicken & Chips", "Grilled chicken with fries.", 11000, "/images/chicken.jpg", 2),
+    menu("chipsi_mishkaki", "rest_chipsi_point", "Mishkaki Plate", "Skewers, chips, kachumbari.", 10000, "/images/chicken.jpg", 3),
   ],
 };
 

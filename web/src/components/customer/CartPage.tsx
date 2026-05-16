@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/cn";
 import { createOrder } from "@/lib/api";
 import { formatTzs } from "./customer-data";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 type CartItem = {
   id: string;
@@ -187,7 +187,7 @@ export function CartPage() {
                   className="grid gap-4 rounded-2xl border border-white/[0.08] bg-black/25 p-3 sm:grid-cols-[6rem_1fr_auto]"
                 >
                   <div className="relative aspect-square overflow-hidden rounded-xl">
-                    <Image src={item.image} alt={item.name} fill className="object-cover" sizes="96px" />
+                    <SafeImage src={item.image} alt={item.name} fill className="object-cover" sizes="96px" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-lg font-semibold text-white">{item.name}</p>

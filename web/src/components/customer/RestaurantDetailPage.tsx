@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { formatTzs } from "./customer-data";
@@ -11,6 +10,7 @@ import {
   type RestaurantDetails,
 } from "@/lib/api";
 import { FALLBACK_IMAGE } from "@/lib/sample-restaurants";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 type RestaurantDetailPageProps = {
   slug: string;
@@ -129,7 +129,7 @@ export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
           <>
             <div className="relative mt-6 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c1119]">
               <div className="relative min-h-72">
-                <Image
+                <SafeImage
                   src={restaurant.image ?? FALLBACK_IMAGE}
                   alt={restaurant.name}
                   fill
@@ -173,7 +173,7 @@ export function RestaurantDetailPage({ slug }: RestaurantDetailPageProps) {
                       className="grid gap-4 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0c1119] p-4 sm:grid-cols-[9rem_1fr]"
                     >
                       <div className="relative min-h-36 overflow-hidden rounded-xl bg-zinc-900">
-                        <Image
+                        <SafeImage
                           src={item.imageUrl ?? FALLBACK_IMAGE}
                           alt={item.name}
                           fill

@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/cn";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 type FoodItem = {
   id: string;
@@ -29,7 +29,8 @@ const foods: FoodItem[] = [
     price: 12000,
     rating: 4.8,
     minutes: "25-35 min",
-    image: "/images/pizza.svg",
+    image:
+      "/images/pizza.jpg",
     description: "Crispy crust, mozzarella, chicken, sweet peppers, and house tomato sauce.",
   },
   {
@@ -40,7 +41,8 @@ const foods: FoodItem[] = [
     price: 11000,
     rating: 4.7,
     minutes: "20-30 min",
-    image: "/images/spice-route.svg",
+    image:
+      "/images/rice.jpg",
     description: "Spiced rice with tender beef, kachumbari, and a light chilli sauce.",
   },
   {
@@ -51,7 +53,8 @@ const foods: FoodItem[] = [
     price: 6000,
     rating: 4.5,
     minutes: "15-25 min",
-    image: "/images/chicken.svg",
+    image:
+      "/images/chicken.jpg",
     description: "Golden fries folded into eggs, served with salad and tomato sauce.",
   },
   {
@@ -62,7 +65,8 @@ const foods: FoodItem[] = [
     price: 9000,
     rating: 4.9,
     minutes: "18-28 min",
-    image: "/images/burger.svg",
+    image:
+      "/images/burger.jpg",
     description: "Grilled beef patty, cheese, pickles, onions, and smoky hash sauce.",
   },
   {
@@ -73,7 +77,8 @@ const foods: FoodItem[] = [
     price: 2000,
     rating: 4.4,
     minutes: "10-15 min",
-    image: "/images/drinks.svg",
+    image:
+      "/images/drinks.jpg",
     description: "Chilled soft drink for the side of your meal.",
   },
 ];
@@ -290,7 +295,7 @@ export function CustomerDashboard() {
                   )}
                 >
                   <div className="relative aspect-square overflow-hidden rounded-xl">
-                    <Image src={food.image} alt={food.name} fill className="object-cover transition group-hover:scale-105" sizes="96px" />
+                    <SafeImage src={food.image} alt={food.name} fill className="object-cover transition group-hover:scale-105" sizes="96px" />
                   </div>
                   <div className="min-w-0 py-1">
                     <div className="flex items-start justify-between gap-2">
@@ -311,7 +316,7 @@ export function CustomerDashboard() {
           <aside className="rounded-2xl border border-white/[0.08] bg-[#0c1119] p-4">
             <h2 className="text-lg font-semibold">Food details</h2>
             <div className="relative mt-4 aspect-[4/3] overflow-hidden rounded-2xl">
-              <Image src={selectedFood.image} alt={selectedFood.name} fill className="object-cover" sizes="320px" />
+              <SafeImage src={selectedFood.image} alt={selectedFood.name} fill className="object-cover" sizes="320px" />
             </div>
             <p className="mt-4 text-xl font-semibold">{selectedFood.name}</p>
             <p className="mt-1 text-sm text-zinc-500">{selectedFood.restaurant} - {selectedFood.minutes}</p>
